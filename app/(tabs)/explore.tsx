@@ -1,237 +1,323 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Pressable, Switch } from 'react-native';
+// app/(tabs)/eight.tsx
+import React, { useMemo, useRef, useState } from 'react';
+import {
+    StyleSheet,
+    View,
+    Pressable,
+    TextInput,
+    FlatList,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+} from 'react-native';
 import { Image } from 'expo-image';
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
+const TOKENS = {
+    bg: '#0f1217',
+    card: '#14161c',
+    cardAlt: '#181a20',
+    border: '#2a2e36',
+    text: '#f2f4f8',
+    textMuted: '#c7cdd4',
+    accent: '#ff37ad',
+    inputBg: '#1b1e25',
+    placeholder: '#9aa3ad',
+    success: '#22c55e',
+};
+
+type ChatMsg = {
+    id: string;
+    text: string;
+    sender: 'me' | 'other';
+    time: string;
+    type: 'text' | 'gift';
+};
+
+const MATCH = {
+    id: '1',
+    name: 'Emma',
+    age: 28,
+    image:
+        'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop',
+    isOnline: true,
+    lastSeen: 'Active now',
+};
+
+const INITIAL_MESSAGES: ChatMsg[] = [
+    { id: '1', text: 'Hey! Thanks for the match! 😊', sender: 'other', time: '10:30 AM', type: 'text' },
+    { id: '2', text: 'Hi Emma! Great to meet you! Your profile caught my eye', sender: 'me', time: '10:32 AM', type: 'text' },
+    { id: '3', text: 'Aww thank you! I love your photos from the hiking trip', sender: 'other', time: '10:35 AM', type: 'text' },
+    { id: '4', text: '🌹', sender: 'me', time: '10:36 AM', type: 'gift' },
+    { id: '5', text: 'That hiking spot is one of my favorites! Do you enjoy outdoor activities too?', sender: 'me', time: '10:38 AM', type: 'text' },
+    { id: '6', text: 'Oh my gosh, thank you for the rose! 💕 And yes, I love hiking and being outdoors!', sender: 'other', time: '10:40 AM', type: 'text' },
+    { id: '7', text: 'Maybe we could go on a hike together sometime? I know some amazing trails around the city', sender: 'other', time: '10:42 AM', type: 'text' },
+];
+
 export default function TabTwoScreen() {
-    const [available, setAvailable] = useState(true);
-    const [online, setOnline] = useState(false);
+    const [message, setMessage] = useState('');
+    const [msgs, setMsgs] = useState<ChatMsg[]>(INITIAL_MESSAGES);
+    const listRef = useRef<FlatList<ChatMsg>>(null);
+
+    const canSend = useMemo(() => message.trim().length > 0, [message]);
+
+    const handleSend = () => {
+        if (!canSend) return;
+        const newMsg: ChatMsg = {
+            id: String(Date.now()),
+            text: message.trim(),
+            sender: 'me',
+            time: 'Now',
+            type: 'text',
+        };
+        setMsgs(prev => [...prev, newMsg]);
+        setMessage('');
+        requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
+    };
+
+    const renderItem = ({ item }: { item: ChatMsg }) => {
+        const mine = item.sender === 'me';
+        const bubbleStyle = [
+            styles.bubble,
+            mine ? styles.bubbleMine : styles.bubbleOther,
+            mine ? { alignSelf: 'flex-end' } : { alignSelf: 'flex-start' },
+        ];
+
+        if (item.type === 'gift') {
+            return (
+                <View style={[styles.row, { justifyContent: mine ? 'flex-end' : 'flex-start' }]}>
+                    <View style={[styles.giftBubble, mine ? styles.giftMine : styles.giftOther]}>
+                        <IconSymbol name="gift.fill" size={20} color="#fff" />
+                        <ThemedText type="defaultSemiBold" style={styles.giftLabel}>Sent a gift</ThemedText>
+                        <ThemedText style={styles.giftEmoji}>{item.text}</ThemedText>
+                    </View>
+                    <ThemedText style={[styles.time, mine ? { textAlign: 'right' } : { textAlign: 'left' }]}>
+                        {item.time}
+                    </ThemedText>
+                </View>
+            );
+        }
+
+        return (
+            <View style={[styles.row, { justifyContent: mine ? 'flex-end' : 'flex-start' }]}>
+                <View style={bubbleStyle}>
+                    <ThemedText style={styles.msgText}>{item.text}</ThemedText>
+                </View>
+                <ThemedText style={[styles.time, mine ? { textAlign: 'right' } : { textAlign: 'left' }]}>
+                    {item.time}
+                </ThemedText>
+            </View>
+        );
+    };
 
     return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-            headerImage={
-                <ThemedView style={styles.headerWrap}>
-                    <Image
-                        source={{
-                            uri:
-                                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1200&auto=format&fit=crop',
-                        }}
-                        contentFit="cover"
-                        style={styles.headerPhoto}
-                    />
-                    <ThemedView style={styles.premiumPill}>
-                        <IconSymbol name="star.fill" size={14} color="#fff" />
-                        <ThemedText type="defaultSemiBold" style={styles.premiumText}>
-                            Premium
-                        </ThemedText>
-                    </ThemedView>
+        <SafeAreaView style={styles.safe}>
+            {/* Header */}
+            <ThemedView style={styles.header}>
+                <View style={styles.headerLeft}>
+                    <Pressable style={styles.iconBtn}>
+                        <IconSymbol name="chevron.left" size={18} color={TOKENS.text} />
+                    </Pressable>
 
-                    <Pressable style={styles.editPhotosBtn}>
-                        <IconSymbol name="camera.fill" size={16} color="#fff" />
-                        <ThemedText type="defaultSemiBold" style={styles.editPhotosText}>
-                            Edit Photos
-                        </ThemedText>
+                    <View style={styles.matchWrap}>
+                        <View style={{ position: 'relative' }}>
+                            <Image source={{ uri: MATCH.image }} style={styles.avatar} contentFit="cover" />
+                            {MATCH.isOnline && <View style={styles.onlineDot} />}
+                        </View>
+                        <View>
+                            <ThemedText type="defaultSemiBold" style={styles.matchName}>
+                                {MATCH.name}
+                            </ThemedText>
+                            <ThemedText style={styles.matchSeen}>{MATCH.lastSeen}</ThemedText>
+                        </View>
+                    </View>
+                </View>
+
+                <View style={styles.headerRight}>
+                    <Pressable style={styles.iconBtn}><IconSymbol name="phone.fill" size={18} color={TOKENS.text} /></Pressable>
+                    <Pressable style={styles.iconBtn}><IconSymbol name="video.fill" size={18} color={TOKENS.text} /></Pressable>
+                    <Pressable style={styles.iconBtn}><IconSymbol name="ellipsis" size={18} color={TOKENS.text} /></Pressable>
+                </View>
+            </ThemedView>
+
+            {/* Messages */}
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{ flex: 1 }}
+                keyboardVerticalOffset={80}
+            >
+                <FlatList
+                    ref={listRef}
+                    data={msgs}
+                    keyExtractor={m => m.id}
+                    renderItem={renderItem}
+                    contentContainerStyle={styles.listContent}
+                    onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+                />
+
+                {/* Quick actions */}
+                <ThemedView style={styles.quickActions}>
+                    <Pressable style={[styles.quickBtn, { backgroundColor: 'rgba(239,68,68,0.12)' }]}>
+                        <IconSymbol name="heart.fill" size={18} color="#ef4444" />
+                    </Pressable>
+                    <Pressable style={[styles.quickBtn, { backgroundColor: 'rgba(139,92,246,0.15)' }]}>
+                        <IconSymbol name="gift.fill" size={18} color="#8b5cf6" />
                     </Pressable>
                 </ThemedView>
-            }
-        >
-            {/* Card body */}
-            <ThemedView style={styles.card}>
-                <View style={styles.rowBetween}>
-                    <ThemedText type="title" style={styles.name}>Alex, 28</ThemedText>
-                    <Pressable style={styles.editChip}>
-                        <IconSymbol name="pencil" size={14} color="#fff" />
-                        <ThemedText type="defaultSemiBold" style={styles.editChipText}>Edit</ThemedText>
+
+                {/* Composer */}
+                <ThemedView style={styles.composerWrap}>
+                    <Pressable style={styles.compIcon}><IconSymbol name="camera.fill" size={16} color={TOKENS.text} /></Pressable>
+
+                    <View style={styles.inputWrap}>
+                        <TextInput
+                            value={message}
+                            onChangeText={setMessage}
+                            placeholder="Type a message..."
+                            placeholderTextColor={TOKENS.placeholder}
+                            style={styles.input}
+                            onSubmitEditing={handleSend}
+                            returnKeyType="send"
+                        />
+                        <Pressable style={styles.emojiBtn}>
+                            <IconSymbol name="face.smiling" size={16} color={TOKENS.textMuted} />
+                        </Pressable>
+                    </View>
+
+                    <Pressable style={styles.compIcon}><IconSymbol name="mic.fill" size={16} color={TOKENS.text} /></Pressable>
+
+                    <Pressable
+                        onPress={handleSend}
+                        disabled={!canSend}
+                        style={[styles.sendBtn, !canSend && { opacity: 0.5 }]}
+                    >
+                        <IconSymbol name="paperplane.fill" size={16} color="#fff" />
                     </Pressable>
-                </View>
-
-                <View style={styles.locRow}>
-                    <IconSymbol name="mappin.and.ellipse" size={16} color="#9aa0a6" />
-                    <ThemedText style={styles.locText}>San Francisco, CA</ThemedText>
-                </View>
-
-                <ThemedText style={styles.bio}>
-                    Adventure seeker, coffee lover, and part-time photographer. Always
-                    looking for new experiences and meaningful connections! ☕📷
-                </ThemedText>
-
-                <View style={styles.statsRow}>
-                    <View style={styles.stat}>
-                        <ThemedText type="subtitle" style={styles.statValue}>124</ThemedText>
-                        <ThemedText style={styles.statLabel}>Likes</ThemedText>
-                    </View>
-                    <View style={styles.stat}>
-                        <ThemedText type="subtitle" style={styles.statValue}>23</ThemedText>
-                        <ThemedText style={styles.statLabel}>Matches</ThemedText>
-                    </View>
-                    <View style={styles.stat}>
-                        <ThemedText type="subtitle" style={styles.statValue}>6</ThemedText>
-                        <ThemedText style={styles.statLabel}>Photos</ThemedText>
-                    </View>
-                    <View style={styles.stat}>
-                        <ThemedText type="subtitle" style={styles.statValue}>4.8</ThemedText>
-                        <ThemedText style={styles.statLabel}>Rating</ThemedText>
-                    </View>
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* Toggles */}
-                <View style={styles.toggleRow}>
-                    <View style={styles.toggleLeft}>
-                        <View style={[styles.dot, { backgroundColor: '#2dd36f' }]} />
-                        <ThemedText type="defaultSemiBold" style={styles.toggleTitle}>Available for meetups</ThemedText>
-                    </View>
-                    <Switch
-                        value={available}
-                        onValueChange={setAvailable}
-                        trackColor={{ false: '#2b2f36', true: '#2b2f36' }}
-                        thumbColor={available ? '#ff37ad' : '#7a7f86'}
-                    />
-                </View>
-
-                <View style={styles.toggleRow}>
-                    <View style={styles.toggleLeft}>
-                        <View style={[styles.dot, { backgroundColor: '#ff5c93' }]} />
-                        <ThemedText type="defaultSemiBold" style={styles.toggleTitle}>Show as online</ThemedText>
-                    </View>
-                    <Switch
-                        value={online}
-                        onValueChange={setOnline}
-                        trackColor={{ false: '#2b2f36', true: '#2b2f36' }}
-                        thumbColor={online ? '#ff37ad' : '#7a7f86'}
-                    />
-                </View>
-            </ThemedView>
-
-            {/* Settings list */}
-            <ThemedView style={styles.list}>
-                <Pressable style={styles.item}>
-                    <View style={styles.itemLeft}>
-                        <View style={styles.itemIcon}><IconSymbol name="bell" size={18} color="#fff" /></View>
-                        <View>
-                            <ThemedText type="defaultSemiBold" style={styles.itemTitle}>Notifications</ThemedText>
-                            <ThemedText style={styles.itemSub}>Manage your alerts</ThemedText>
-                        </View>
-                    </View>
-                    <IconSymbol name="chevron.right" size={18} color="#9aa0a6" />
-                </Pressable>
-
-                <Pressable style={styles.item}>
-                    <View style={styles.itemLeft}>
-                        <View style={styles.itemIcon}><IconSymbol name="shield.fill" size={18} color="#fff" /></View>
-                        <View>
-                            <ThemedText type="defaultSemiBold" style={styles.itemTitle}>Privacy & Safety</ThemedText>
-                            <ThemedText style={styles.itemSub}>Control your visibility</ThemedText>
-                        </View>
-                    </View>
-                    <IconSymbol name="chevron.right" size={18} color="#9aa0a6" />
-                </Pressable>
-
-                {/* NEW: Dating Preferences */}
-                <Pressable style={styles.item}>
-                    <View style={styles.itemLeft}>
-                        <View style={styles.itemIcon}><IconSymbol name="heart" size={18} color="#fff" /></View>
-                        <View>
-                            <ThemedText type="defaultSemiBold" style={styles.itemTitle}>Dating Preferences</ThemedText>
-                            <ThemedText style={styles.itemSub}>Set your criteria</ThemedText>
-                        </View>
-                    </View>
-                    <IconSymbol name="chevron.right" size={18} color="#9aa0a6" />
-                </Pressable>
-
-                {/* NEW: Subscription & Billing */}
-                <Pressable style={styles.item}>
-                    <View style={styles.itemLeft}>
-                        <View style={styles.itemIcon}><IconSymbol name="creditcard" size={18} color="#fff" /></View>
-                        <View>
-                            <ThemedText type="defaultSemiBold" style={styles.itemTitle}>Subscription & Billing</ThemedText>
-                            <ThemedText style={styles.itemSub}>Manage your plan</ThemedText>
-                        </View>
-                    </View>
-                    <IconSymbol name="chevron.right" size={18} color="#9aa0a6" />
-                </Pressable>
-            </ThemedView>
-
-            {/* NEW: Sign Out block */}
-            <ThemedView style={[styles.list, styles.signOutBlock]}>
-                <Pressable style={styles.itemNoBorder}>
-                    <View style={styles.itemLeft}>
-                        <View style={[styles.itemIcon, { backgroundColor: 'rgba(255,59,48,0.12)' }]}>
-                            <IconSymbol name="rectangle.portrait.and.arrow.right" size={18} color="#ff3b30" />
-                        </View>
-                        <View>
-                            <ThemedText type="defaultSemiBold" style={styles.signOutTitle}>Sign Out</ThemedText>
-                            <ThemedText style={styles.signOutSub}>Log out of your account</ThemedText>
-                        </View>
-                    </View>
-                    <IconSymbol name="chevron.right" size={18} color="#9aa0a6" />
-                </Pressable>
-            </ThemedView>
-        </ParallaxScrollView>
+                </ThemedView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    headerWrap: { height: 300, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, overflow: 'hidden' },
-    headerPhoto: { width: '100%', height: '100%' },
+    safe: { flex: 1, backgroundColor: TOKENS.bg },
 
-    premiumPill: {
-        position: 'absolute', top: 12, left: 12,
-        backgroundColor: '#5b6cff', paddingHorizontal: 10, paddingVertical: 6,
-        borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 6,
+    // Header
+    header: {
+        backgroundColor: TOKENS.card,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: TOKENS.border,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
-    premiumText: { color: '#fff', fontSize: 12 },
-
-    editPhotosBtn: {
-        position: 'absolute', top: 12, right: 12,
-        backgroundColor: 'rgba(0,0,0,0.55)', paddingHorizontal: 12, paddingVertical: 8,
-        borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 6,
+    headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    headerRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    iconBtn: {
+        width: 36, height: 36, borderRadius: 18,
+        alignItems: 'center', justifyContent: 'center',
+        backgroundColor: TOKENS.cardAlt, borderWidth: StyleSheet.hairlineWidth, borderColor: TOKENS.border,
     },
-    editPhotosText: { color: '#fff', fontSize: 13 },
-
-    card: { backgroundColor: '#181a20', borderRadius: 20, padding: 16, marginTop: 12, gap: 10 },
-    rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    name: { fontSize: 26, fontWeight: '800' },
-
-    editChip: { backgroundColor: '#22242a', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, flexDirection: 'row', alignItems: 'center', gap: 6 },
-    editChipText: { color: '#fff', fontSize: 13 },
-
-    locRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    locText: { color: '#9aa0a6', fontSize: 15, fontWeight: '600' },
-    bio: { lineHeight: 20, color: '#d3d6db', marginTop: 4 },
-
-    statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
-    stat: { alignItems: 'center', flex: 1 },
-    statValue: { color: '#ff37ad', fontWeight: '800' },
-    statLabel: { color: '#9aa0a6', fontSize: 12, marginTop: 2 },
-
-    divider: { height: 1, backgroundColor: '#272a31', marginVertical: 8 },
-
-    toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10 },
-    toggleLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    toggleTitle: { fontSize: 16, color: '#fff' },
-    dot: { width: 8, height: 8, borderRadius: 4 },
-
-    list: { backgroundColor: '#181a20', borderRadius: 16, marginTop: 12, paddingHorizontal: 12 },
-    signOutBlock: { marginTop: 16 },
-    item: {
-        paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#262a31',
+    matchWrap: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#22252b' },
+    onlineDot: {
+        position: 'absolute', right: -1, bottom: -1, width: 12, height: 12, borderRadius: 6,
+        backgroundColor: TOKENS.success, borderWidth: 2, borderColor: TOKENS.card,
     },
-    itemNoBorder: {
-        paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    },
-    itemLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    itemIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#22252b', alignItems: 'center', justifyContent: 'center' },
-    itemTitle: { fontSize: 16 },
-    itemSub: { color: '#9aa0a6', fontSize: 13, marginTop: 2 },
+    matchName: { color: TOKENS.text, fontSize: 15 },
+    matchSeen: { color: TOKENS.textMuted, fontSize: 11, marginTop: 2 },
 
-    signOutTitle: { fontSize: 16, color: '#ff3b30' },
-    signOutSub: { color: '#ff7b70', fontSize: 13, marginTop: 2 },
+    // List
+    listContent: { paddingHorizontal: 14, paddingTop: 12, paddingBottom: 8 },
+    row: { marginBottom: 8 },
+    bubble: {
+        maxWidth: '80%',
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 18,
+    },
+    bubbleMine: { backgroundColor: TOKENS.accent, borderTopRightRadius: 4 },
+    bubbleOther: { backgroundColor: TOKENS.card, borderWidth: StyleSheet.hairlineWidth, borderColor: TOKENS.border, borderTopLeftRadius: 4 },
+    msgText: { color: '#fff', fontSize: 14 },
+
+    time: { color: TOKENS.textMuted, fontSize: 10, marginTop: 4 },
+
+    // Gift bubble
+    giftBubble: {
+        maxWidth: '80%',
+        padding: 14,
+        borderRadius: 18,
+        alignItems: 'center',
+        gap: 6,
+    },
+    giftMine: { backgroundColor: TOKENS.accent },
+    giftOther: { backgroundColor: TOKENS.card, borderWidth: StyleSheet.hairlineWidth, borderColor: TOKENS.border },
+    giftLabel: { color: '#fff', fontSize: 12 },
+    giftEmoji: { color: '#fff', fontSize: 22, marginTop: 2 },
+
+    // Quick actions
+    quickActions: {
+        paddingVertical: 8,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderColor: TOKENS.border,
+        backgroundColor: TOKENS.card,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 12,
+    },
+    quickBtn: {
+        width: 44, height: 44, borderRadius: 22,
+        alignItems: 'center', justifyContent: 'center',
+        borderWidth: StyleSheet.hairlineWidth, borderColor: TOKENS.border,
+    },
+
+    // Composer
+    composerWrap: {
+        backgroundColor: TOKENS.card,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: TOKENS.border,
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    compIcon: {
+        width: 40, height: 40, borderRadius: 20,
+        backgroundColor: TOKENS.cardAlt, borderWidth: StyleSheet.hairlineWidth, borderColor: TOKENS.border,
+        alignItems: 'center', justifyContent: 'center',
+    },
+    inputWrap: {
+        flex: 1,
+        position: 'relative',
+        backgroundColor: TOKENS.inputBg,
+        borderRadius: 22,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: TOKENS.border,
+        paddingRight: 36,
+    },
+    input: {
+        color: TOKENS.text,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        fontSize: 14,
+    },
+    emojiBtn: {
+        position: 'absolute',
+        right: 4,
+        top: 4,
+        width: 32, height: 32, borderRadius: 16,
+        alignItems: 'center', justifyContent: 'center',
+    },
+    sendBtn: {
+        backgroundColor: TOKENS.accent,
+        width: 44, height: 44, borderRadius: 22,
+        alignItems: 'center', justifyContent: 'center',
+    },
 });
