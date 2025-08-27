@@ -9,6 +9,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Drawer } from 'expo-router/drawer';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import "../global.css"
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();

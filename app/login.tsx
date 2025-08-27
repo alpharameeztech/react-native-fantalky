@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useRouter } from 'expo-router';
+import '../global.css';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -27,7 +28,7 @@ export default function LoginScreen() {
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f0f0f0' }}>
             <View style={styles.container}>
                 <View style={{ marginTop: 130, width: 260 }}>
-                    <ThemedText>Login Screen</ThemedText>
+                    <ThemedText className="text-xl font-bold text-blue-500">Login Screen</ThemedText>
 
                     <View style={{ marginTop: 40 }}>
                         <TextInput
