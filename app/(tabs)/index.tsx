@@ -1,243 +1,213 @@
-// app/(tabs)/index.tsx — Discover screen, black theme, edge-to-edge (frontend view only)
-// Follows the same styling patterns as your Profile screen (Themed* + IconSymbol).
-import React from 'react';
-import { StyleSheet, View, Pressable, ScrollView } from 'react-native';
-import { Image } from 'expo-image';
+import React, { useState } from "react";
+import { SafeAreaView, View, ScrollView, Pressable, Text } from "react-native";
+import { useRouter } from "expo-router";
+import { Sparkles, Filter, RotateCcw } from "lucide-react-native";
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { SwipeCard } from "@/components/discover/SwipeCard"; // must be RN
+// If your SwipeCard renders images, ensure it uses expo-image with a placeholder.
 
-export default function HomeScreen() {
+type Profile = {
+    id: string;
+    name: string;
+    age: number;
+    location: string;
+    bio: string;
+    occupation: string;
+    images: string[];
+    distance: number;
+    verified: boolean;
+};
+
+const mockProfiles: Profile[] = [
+    {
+        id: "1",
+        name: "Emma",
+        age: 28,
+        location: "New York, NY",
+        bio: "Love hiking, coffee, and deep conversations. Looking for someone who shares my passion for adventure and growth.",
+        occupation: "Marketing Manager",
+        images: [
+            "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=600&fit=crop",
+        ],
+        distance: 2,
+        verified: true,
+    },
+    {
+        id: "2",
+        name: "James",
+        age: 32,
+        location: "Brooklyn, NY",
+        bio: "Photographer who loves capturing life's beautiful moments. Seeking genuine connections and shared adventures.",
+        occupation: "Photographer",
+        images: [
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop",
+        ],
+        distance: 5,
+        verified: false,
+    },
+    {
+        id: "3",
+        name: "Sophie",
+        age: 26,
+        location: "Manhattan, NY",
+        bio: "Yoga instructor and wellness enthusiast. Looking for someone who values mindfulness and healthy living.",
+        occupation: "Yoga Instructor",
+        images: [
+            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=600&fit=crop",
+        ],
+        distance: 3,
+        verified: true,
+    },
+];
+
+/** Small RN buttons styled with Tailwind (NativeWind) */
+function IconButton({
+                        onPress,
+                        disabled,
+                        children,
+                    }: {
+    onPress?: () => void;
+    disabled?: boolean;
+    children: React.ReactNode;
+}) {
     return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#000', dark: '#000' }}
-            headerImage={
-                <ThemedView style={styles.headerWrap}>
-                    {/* Top bar — title + Filters pill */}
-                    <View style={styles.headerRow}>
-                        <View>
-                            <ThemedText type="title" style={styles.headerTitle}>Discover</ThemedText>
-                            <ThemedText style={styles.headerSub}>Find people near you</ThemedText>
-                        </View>
-                        <Pressable style={styles.filtersPill}>
-                            <IconSymbol name="slider.horizontal.3" size={14} color="#fff" />
-                            <ThemedText type="defaultSemiBold" style={styles.filtersText}>Filters</ThemedText>
-                        </Pressable>
-                    </View>
-
-                    {/* Search input (visual only) */}
-                    <ThemedView style={styles.searchFloating}>
-                        <IconSymbol name="magnifyingglass" size={16} color="#bfc2c7" />
-                        <ThemedText style={styles.searchPlaceholder}>Search by name or interests…</ThemedText>
-                    </ThemedView>
-                </ThemedView>
-            }
+        <Pressable
+            onPress={onPress}
+            disabled={disabled}
+            className={`w-11 h-11 rounded-full items-center justify-center bg-white/80 border border-white/20 ${
+                disabled ? "opacity-40" : "opacity-100"
+            }`}
         >
-            {/* Edge-to-edge container (kills side gutters) */}
-            <View style={styles.page}>
-                {/* Filter chips — horizontal scroll like web design */}
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.chipsRow}
-                >
-                    <Pressable style={[styles.chip, styles.chipPrimary]}>
-                        <IconSymbol name="mappin.and.ellipse" size={14} color="#fff" />
-                        <ThemedText type="defaultSemiBold" style={styles.chipText}>Nearby (5 km)</ThemedText>
-                    </Pressable>
-                    <Pressable style={styles.chip}>
-                        <ThemedText type="defaultSemiBold" style={styles.chipText}>Online Now</ThemedText>
-                    </Pressable>
-                    <Pressable style={styles.chip}>
-                        <ThemedText type="defaultSemiBold" style={styles.chipText}>Creators</ThemedText>
-                    </Pressable>
-                    <Pressable style={styles.chip}>
-                        <ThemedText type="defaultSemiBold" style={styles.chipText}>Available</ThemedText>
-                    </Pressable>
-                </ScrollView>
-
-                {/* Profile card — full width */}
-                <ThemedView style={styles.card}>
-                    {/* Corner avatar */}
-                    <Image
-                        source={{ uri: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=200&auto=format&fit=crop' }}
-                        style={styles.cornerAvatar}
-                    />
-
-                    {/* Top labels over photo */}
-                    <View style={styles.cardTopRow}>
-                        <ThemedText type="defaultSemiBold" style={styles.cardNameTop}>Emma</ThemedText>
-                        <View style={styles.badgesRow}>
-                            <View style={[styles.badge, { backgroundColor: '#20c997' }]}>
-                                <ThemedText style={styles.badgeText}>Online</ThemedText>
-                            </View>
-                            <View style={[styles.badge, { backgroundColor: '#ff5c93' }]}>
-                                <ThemedText style={styles.badgeText}>Available</ThemedText>
-                            </View>
-                            <View style={[styles.badge, { backgroundColor: '#3aa7ff' }]}>
-                                <IconSymbol name="star.fill" size={12} color="#fff" />
-                                <ThemedText style={[styles.badgeText, { marginLeft: 4 }]}>Creator</ThemedText>
-                            </View>
-                        </View>
-                        <View style={styles.photoCount}>
-                            <IconSymbol name="camera.fill" size={14} color="#fff" />
-                            <ThemedText style={styles.photoCountText}>1</ThemedText>
-                        </View>
-                    </View>
-
-                    {/* Photo */}
-                    <Image
-                        source={{ uri: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop' }}
-                        contentFit="cover"
-                        style={styles.heroPhoto}
-                    />
-
-                    {/* Actions (visual only) */}
-                    <View style={styles.actionsRow}>
-                        <View style={styles.actionCircleGhost}>
-                            <ThemedText style={styles.actionGhostX}>×</ThemedText>
-                        </View>
-                        <View style={styles.actionCirclePrimary}>
-                            <IconSymbol name="heart.fill" size={22} color="#fff" />
-                        </View>
-                    </View>
-
-                    {/* Info */}
-                    <View style={styles.infoWrap}>
-                        <View style={styles.titleRow}>
-                            <ThemedText type="title" style={styles.title}>Emma, 25</ThemedText>
-                            <View style={styles.rating}>
-                                <IconSymbol name="star.fill" size={16} color="#ffc83d" />
-                                <ThemedText style={styles.ratingText}>4.8</ThemedText>
-                            </View>
-                        </View>
-
-                        <View style={styles.metaRow}>
-                            <IconSymbol name="mappin.and.ellipse" size={16} color="#a9aeb6" />
-                            <ThemedText style={styles.metaText}>Downtown • 2.1 km away</ThemedText>
-                        </View>
-
-                        <ThemedText style={styles.bio}>
-                            Content creator, love traveling and photography. Always up for new adventures! 📸✨
-                        </ThemedText>
-                    </View>
-                </ThemedView>
-            </View>
-        </ParallaxScrollView>
+            {children}
+        </Pressable>
     );
 }
 
-/* ========== Styles ========== */
-const styles = StyleSheet.create({
-    /* Header */
-    headerWrap: {
-        height: 140,
-        backgroundColor: '#000',
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-        overflow: 'hidden',
-        paddingHorizontal: 16,
-        paddingTop: 10,
-    },
-    headerRow: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    },
-    headerTitle: { color: '#fff' },
-    headerSub: { color: '#b8bdc5', marginTop: 2 },
-    filtersPill: {
-        backgroundColor: 'rgba(255,255,255,0.12)',
-        paddingHorizontal: 12, paddingVertical: 8,
-        borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 6,
-    },
-    filtersText: { color: '#fff', fontSize: 12 },
+function PrimaryButton({
+                           title,
+                           onPress,
+                           className = "",
+                       }: {
+    title: string;
+    onPress?: () => void;
+    className?: string;
+}) {
+    return (
+        <Pressable
+            onPress={onPress}
+            className={`px-5 py-3 rounded-xl bg-[#ff37ad] items-center ${className}`}
+        >
+            <Text className="text-white font-semibold">{title}</Text>
+        </Pressable>
+    );
+}
 
-    /* Search floating at bottom of header */
-    searchFloating: {
-        position: 'absolute',
-        left: 16, right: 16, bottom: 10,
-        height: 44, borderRadius: 22,
-        backgroundColor: 'rgba(255,255,255,0.06)',
-        flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14,
-    },
-    searchPlaceholder: { color: '#d7dae0', fontSize: 16, opacity: 0.9 },
+export default function DiscoverScreen() {
+    const router = useRouter();
+    const [profiles, setProfiles] = useState<Profile[]>(mockProfiles);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
-    /* Page — edge to edge */
-    page: {
-        backgroundColor: '#000',
-        paddingTop: 8,
-        paddingBottom: 16,
-        paddingHorizontal: 16,
-        marginHorizontal: -16, // remove ParallaxScrollView side padding (full width)
-    },
+    const handleSwipe = (direction: "left" | "right", profileId: string) => {
+        // console.log(`Swiped ${direction} on ${profileId}`);
+        setTimeout(() => setCurrentIndex((prev) => prev + 1), 300);
+    };
 
-    /* Chips */
-    chipsRow: { paddingVertical: 6, gap: 8, paddingRight: 16 },
-    chip: {
-        paddingHorizontal: 12, paddingVertical: 8, borderRadius: 18,
-        borderWidth: 1, borderColor: 'rgba(255,255,255,0.14)',
-        backgroundColor: 'rgba(255,255,255,0.08)', marginRight: 8,
-        flexDirection: 'row', alignItems: 'center', gap: 6,
-    },
-    chipPrimary: { backgroundColor: 'rgba(255,255,255,0.12)', borderColor: 'transparent' },
-    chipText: { color: '#fff', fontSize: 13 },
+    const handleRewind = () => {
+        if (currentIndex > 0) setCurrentIndex((prev) => prev - 1);
+    };
 
-    /* Full-width card */
-    card: {
-        backgroundColor: '#181a20',
-        borderRadius: 20,
-        overflow: 'hidden',
-        marginTop: 8,
-    },
-    cornerAvatar: {
-        position: 'absolute', top: -14, left: -14,
-        width: 36, height: 36, borderRadius: 18,
-        borderWidth: 2, borderColor: '#181a20', zIndex: 2,
-    },
-    cardTopRow: {
-        position: 'absolute', left: 14, right: 14, top: 10, zIndex: 3,
-        flexDirection: 'row', alignItems: 'center',
-    },
-    cardNameTop: {
-        color: '#fff', fontWeight: '800', fontSize: 18, marginRight: 8,
-        textShadowColor: 'rgba(0,0,0,0.35)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2,
-    },
-    badgesRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
-    badge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14 },
-    badgeText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+    const currentProfile = profiles[currentIndex];
 
-    photoCount: {
-        marginLeft: 'auto', backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 16,
-        paddingHorizontal: 8, paddingVertical: 6, flexDirection: 'row', alignItems: 'center', gap: 6,
-    },
-    photoCountText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+    return (
+        <SafeAreaView className="flex-1 bg-black">
+            <ScrollView className="flex-1 bg-black" contentContainerStyle={{ paddingBottom: 180 }}>
+                {/* Header */}
+                <View className="px-6 pt-4 pb-4">
+                    <View className="flex-row items-center justify-between mx-auto w-full max-w-md">
+                        <IconButton onPress={() => router.push("/map")}>
+                            <Filter size={20} color="#0f172a" />
+                        </IconButton>
 
-    heroPhoto: { width: '100%', height: 360 },
+                        <View className="items-center">
+                            <Text className="text-2xl font-bold text-transparent bg-clip-text">
+                                {/* apply color via class when using your gradient util; for now white */}
+                            </Text>
+                            <Text className="text-2xl font-bold text-white">Discover</Text>
+                            <Text className="text-sm text-neutral-400">
+                                {profiles.length - currentIndex} profiles nearby
+                            </Text>
+                        </View>
 
-    /* Actions */
-    actionsRow: {
-        position: 'absolute', bottom: 92, left: 0, right: 0, zIndex: 4,
-        flexDirection: 'row', justifyContent: 'center', gap: 22,
-    },
-    actionCircleGhost: {
-        width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(0,0,0,0.5)',
-        borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)', alignItems: 'center', justifyContent: 'center',
-    },
-    actionGhostX: { color: '#fff', fontSize: 24, fontWeight: '800' },
-    actionCirclePrimary: {
-        width: 72, height: 72, borderRadius: 36, backgroundColor: '#ff37ad',
-        alignItems: 'center', justifyContent: 'center',
-        elevation: 10, shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 16, shadowOffset: { width: 0, height: 10 },
-    },
+                        <IconButton onPress={handleRewind} disabled={currentIndex === 0}>
+                            <RotateCcw size={20} color="#0f172a" />
+                        </IconButton>
+                    </View>
+                </View>
 
-    /* Info */
-    infoWrap: { paddingHorizontal: 18, paddingTop: 18, paddingBottom: 16 },
-    titleRow: { flexDirection: 'row', alignItems: 'center' },
-    title: { flex: 1, color: '#fff', fontSize: 26, fontWeight: '900' },
-    rating: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    ratingText: { color: '#ffd24d', fontWeight: '800', fontSize: 16 },
-    metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
-    metaText: { color: '#a9aeb6', fontSize: 15, fontWeight: '600' },
-    bio: { color: '#d1d4da', marginTop: 12, lineHeight: 20, fontSize: 15 },
-});
+                {/* Swipe Cards Container */}
+                <View className="px-6 items-center">
+                    {currentIndex < profiles.length ? (
+                        <View className="relative">
+                            {/* Current Card */}
+                            <SwipeCard profile={currentProfile} onSwipe={handleSwipe} />
+
+                            {/* Next Card preview */}
+                            {currentIndex + 1 < profiles.length && (
+                                <View className="absolute top-4 left-2 right-2 -z-10 opacity-50 scale-95">
+                                    <SwipeCard
+                                        profile={profiles[currentIndex + 1]}
+                                        onSwipe={() => {}}
+                                    />
+                                </View>
+                            )}
+                        </View>
+                    ) : (
+                        <View className="items-center py-20">
+                            <Sparkles
+                                size={64}
+                                color="#ff37ad"
+                                className="mb-6"
+                            />
+                            <Text className="text-2xl font-bold text-white mb-2">
+                                You're all caught up!
+                            </Text>
+                            <Text className="text-neutral-400 mb-6">
+                                Check back later for more amazing profiles
+                            </Text>
+                            <PrimaryButton
+                                title="Start Over"
+                                onPress={() => {
+                                    setCurrentIndex(0);
+                                    setProfiles([...mockProfiles]);
+                                }}
+                                className="w-40"
+                            />
+                        </View>
+                    )}
+                </View>
+            </ScrollView>
+
+            {/* Premium Suggestion (overlay above the tab bar) */}
+            <View className="absolute bottom-28 left-6 right-6 z-40">
+                <View className="mx-auto w-full max-w-md bg-white/90 rounded-2xl p-4 border border-white/20">
+                    <View className="flex-row items-center space-x-3">
+                        <View className="w-12 h-12 rounded-full items-center justify-center" style={{ backgroundColor: "#8b5cf6" }}>
+                            <Sparkles size={24} color="#fff" />
+                        </View>
+                        <View className="flex-1">
+                            <Text className="text-white font-semibold">Get More Matches</Text>
+                            <Text className="text-sm text-neutral-700">
+                                Upgrade to Premium for unlimited likes
+                            </Text>
+                        </View>
+                        <PrimaryButton
+                            title="Upgrade"
+                            onPress={() => router.push("/premium")}
+                            className="px-4 py-2"
+                        />
+                    </View>
+                </View>
+            </View>
+        </SafeAreaView>
+    );
+}
