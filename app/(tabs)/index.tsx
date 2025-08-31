@@ -27,7 +27,7 @@ const mockProfiles: Profile[] = [
         bio: "Love hiking, coffee, and deep conversations. Looking for someone who shares my passion for adventure and growth.",
         occupation: "Marketing Manager",
         images: [
-            "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=600&fit=crop",
+            "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=900&q=80",
         ],
         distance: 2,
         verified: true,
@@ -147,19 +147,20 @@ export default function DiscoverScreen() {
                 {/* Swipe Cards Container */}
                 <View className="px-6 items-center">
                     {currentIndex < profiles.length ? (
-                        <View className="relative">
-                            {/* Current Card */}
-                            <SwipeCard profile={currentProfile} onSwipe={handleSwipe} />
-
-                            {/* Next Card preview */}
+                        <View className="relative items-center">
+                            {/* Preview under the active card */}
                             {currentIndex + 1 < profiles.length && (
-                                <View className="absolute top-4 left-2 right-2 -z-10 opacity-50 scale-95">
-                                    <SwipeCard
-                                        profile={profiles[currentIndex + 1]}
-                                        onSwipe={() => {}}
-                                    />
+                                <View
+                                    pointerEvents="none"
+                                    className="absolute inset-0 items-center justify-start pt-4 opacity-50"
+                                    style={{ zIndex: 0 }}
+                                >
+                                    <SwipeCard profile={profiles[currentIndex + 1]} onSwipe={() => {}} />
                                 </View>
                             )}
+
+                            {/* Active card on top */}
+                            <SwipeCard key={currentProfile.id} profile={currentProfile} onSwipe={handleSwipe} />
                         </View>
                     ) : (
                         <View className="items-center py-20">
