@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, Pressable, Switch } from 'react-native';
+import { View, Pressable, Switch, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -17,10 +17,10 @@ type NearbyUser = {
 };
 
 const nearbyUsers: NearbyUser[] = [
-    { id: '1', name: 'Emma',    age: 28, distance: 0.5, isOnline: true,  image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop' },
-    { id: '2', name: 'James',   age: 32, distance: 1.2, isOnline: true,  image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop' },
-    { id: '3', name: 'Sophie',  age: 26, distance: 2.1, isOnline: false, image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop' },
-    { id: '4', name: 'Michael', age: 30, distance: 3.4, isOnline: true,  image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop' },
+    { id: '1', name: 'Emma',    age: 28, distance: 0.5, isOnline: true,  image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&h=200&q=80' },
+    { id: '2', name: 'James',   age: 32, distance: 1.2, isOnline: true,  image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&h=200&q=80' },
+    { id: '3', name: 'Sophie',  age: 26, distance: 2.1, isOnline: false, image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&h=200&q=80' },
+    { id: '4', name: 'Michael', age: 30, distance: 3.4, isOnline: true,  image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&h=200&q=80' },
 ];
 
 const locations = [
@@ -30,133 +30,171 @@ const locations = [
     { name: 'Bronx',     count: 43,  distance: '15.7 km' },
 ];
 
+const BLURHASH = 'L6Pj0^i_.AyE_3t7t7R**0o#DgR4';
+
 export default function TabThreeScreen() {
     const [isMapEnabled, setIsMapEnabled] = useState(true);
     const onlineCount = useMemo(() => nearbyUsers.filter(u => u.isOnline).length, []);
 
     return (
         <ParallaxScrollView
-            headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+            headerBackgroundColor={{ light: '#f3f4f6', dark: '#f3f4f6' }}
             headerImage={
-                <ThemedView style={styles.headerWrap}>
-                    {/* Header background image */}
+                <ThemedView className="h-56 rounded-b-3xl overflow-hidden bg-slate-200">
+                    {/* Banner image — use explicit size */}
                     <Image
-                        source={{
-                            uri: 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?q=80&w=1200&auto=format&fit=crop',
-                        }}
+                        source={{ uri: 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=1200&q=80' }}
+                        placeholder={BLURHASH}
                         contentFit="cover"
-                        style={styles.headerPhoto}
+                        cachePolicy="memory-disk"
+                        style={{ width: '100%', height: '100%' }}
                     />
-                    {/* Header pills & actions */}
-                    <ThemedView style={styles.premiumPill}>
+
+                    {/* Header pill */}
+                    <ThemedView className="absolute top-3 left-3 bg-violet-600 px-3 py-1 rounded-full flex-row items-center gap-1.5">
                         <IconSymbol name="star.fill" size={14} color="#fff" />
-                        <ThemedText type="defaultSemiBold" style={styles.premiumText}>
+                        <ThemedText type="defaultSemiBold" className="text-white text-xs">
                             Map Discovery
                         </ThemedText>
                     </ThemedView>
 
-                    <View style={styles.headerActions}>
-                        <Pressable style={styles.headerIconBtn}>
-                            <IconSymbol name="line.3.horizontal.decrease.circle" size={18} color="#fff" />
+                    {/* Header actions */}
+                    <View className="absolute top-3 right-3 flex-row gap-2">
+                        <Pressable className="bg-white/90 px-2.5 py-2 rounded-xl border border-slate-200">
+                            <IconSymbol name="line.3.horizontal.decrease.circle" size={18} color="#0f172a" />
                         </Pressable>
-                        <Pressable style={styles.headerIconBtn}>
-                            <IconSymbol name="location.circle" size={18} color="#fff" />
+                        <Pressable className="bg-white/90 px-2.5 py-2 rounded-xl border border-slate-200">
+                            <IconSymbol name="location.circle" size={18} color="#0f172a" />
                         </Pressable>
                     </View>
                 </ThemedView>
             }
         >
             {/* Top info card */}
-            <ThemedView style={styles.card}>
-                <View style={styles.rowBetween}>
+            <ThemedView className="bg-white rounded-2xl p-4 mt-3 border border-slate-200">
+                <View className="flex-row items-center justify-between">
                     <View>
-                        <ThemedText type="subtitle" style={styles.titleText}>Map Discovery</ThemedText>
-                        <ThemedText style={styles.mutedText}>
+                        <ThemedText type="subtitle" className="text-slate-900 font-extrabold">
+                            Map Discovery
+                        </ThemedText>
+                        <ThemedText className="text-slate-500 text-xs mt-0.5">
                             {onlineCount} people online nearby
                         </ThemedText>
                     </View>
 
-                    <Pressable style={styles.editChip}>
+                    <Pressable className="bg-slate-900 px-3 py-2 rounded-lg flex-row items-center gap-1.5">
                         <IconSymbol name="chevron.right" size={14} color="#fff" />
-                        <ThemedText type="defaultSemiBold" style={styles.editChipText}>Discover</ThemedText>
+                        <ThemedText type="defaultSemiBold" className="text-white text-xs">Discover</ThemedText>
                     </Pressable>
                 </View>
             </ThemedView>
 
             {/* Location sharing toggle */}
-            <ThemedView style={styles.card}>
-                <View style={styles.rowBetween}>
-                    <View style={styles.toggleLeft}>
-                        <View style={[styles.dot, { backgroundColor: '#2dd36f' }]} />
+            <ThemedView className="bg-white rounded-2xl p-4 mt-3 border border-slate-200">
+                <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center gap-2.5">
+                        <View className="w-2 h-2 rounded-full bg-emerald-500" />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={styles.toggleTitle}>Location Sharing</ThemedText>
-                            <ThemedText style={styles.mutedText}>Show me on the map to others</ThemedText>
+                            <ThemedText type="defaultSemiBold" className="text-slate-900 text-base">
+                                Location Sharing
+                            </ThemedText>
+                            <ThemedText className="text-slate-500 text-xs">
+                                Show me on the map to others
+                            </ThemedText>
                         </View>
                     </View>
+
                     <Switch
                         value={isMapEnabled}
                         onValueChange={setIsMapEnabled}
-                        trackColor={{ false: '#2b2f36', true: '#2b2f36' }}
-                        thumbColor={isMapEnabled ? '#ff37ad' : '#7a7f86'}
+                        trackColor={{ false: '#e5e7eb', true: '#e5e7eb' }}
+                        thumbColor={isMapEnabled ? '#ff37ad' : '#9ca3af'}
                     />
                 </View>
             </ThemedView>
 
             {/* Mock Map */}
-            <ThemedView style={styles.card}>
-                <View style={styles.mapBox}>
-                    {/* soft gradient backdrop with two colored layers */}
-                    <View style={[styles.mapLayer, { backgroundColor: '#cfeafe' }]} />
-                    <View style={[styles.mapLayer, { backgroundColor: '#d9fbe5', transform: [{ rotate: '12deg' }] }]} />
+            <ThemedView className="bg-white rounded-2xl p-4 mt-3 border border-slate-200">
+                <View className="relative rounded-2xl overflow-hidden" style={{ width: '100%', aspectRatio: 1 }}>
+                    {/* soft background layers */}
+                    <View className="absolute inset-0 bg-blue-100" />
+                    <View className="absolute inset-0 opacity-60" style={{ transform: [{ rotate: '12deg' }] }}>
+                        <View className="absolute inset-0 bg-green-100" />
+                    </View>
 
                     {/* pins */}
                     {nearbyUsers.map((u, idx) => {
                         const left = 20 + (idx * 15);
-                        const top = 28 + (idx * 12);
+                        const top = 25 + (idx * 12);
                         return (
-                            <View key={u.id} style={[styles.pin, { left: `${left}%`, top: `${top}%` }, u.isOnline && styles.pinRing]}>
-                                <Image source={{ uri: u.image }} style={{ width: '100%', height: '100%' }} />
-                                {u.isOnline && <View style={styles.onlineDot} />}
+                            <View
+                                key={u.id}
+                                className={`absolute w-12 h-12 rounded-full border-4 border-white overflow-hidden ${u.isOnline ? 'ring-2 ring-emerald-400' : ''}`}
+                                style={{ left: `${left}%`, top: `${top}%` }}
+                            >
+                                {/* Avatar image — explicit size inside rounded container */}
+                                <Image
+                                    source={{ uri: u.image }}
+                                    placeholder={BLURHASH}
+                                    contentFit="cover"
+                                    cachePolicy="memory-disk"
+                                    style={{ width: '100%', height: '100%' }}
+                                />
+                                {u.isOnline && (
+                                    <View className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white" />
+                                )}
                             </View>
                         );
                     })}
 
                     {/* current user dot */}
-                    <View style={styles.centerDot} />
+                    <View className="absolute left-1/2 top-1/2 -ml-1.5 -mt-1.5 w-3 h-3 rounded-full bg-indigo-500 border-4 border-white" />
                 </View>
 
-                <View style={styles.mapCaption}>
-                    <IconSymbol name="mappin.and.ellipse" size={14} color="#9aa0a6" />
-                    <ThemedText style={styles.captionText}>
+                <View className="mt-2 self-center flex-row items-center">
+                    <IconSymbol name="mappin.and.ellipse" size={14} color="#64748b" />
+                    <ThemedText className="ml-1.5 text-slate-500 text-xs">
                         New York, NY · Showing {nearbyUsers.length} nearby users
                     </ThemedText>
                 </View>
             </ThemedView>
 
             {/* People Nearby */}
-            <ThemedView style={styles.card}>
-                <View style={styles.sectionHeader}>
-                    <IconSymbol name="person.2.fill" size={16} color="#fff" />
-                    <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>People Nearby</ThemedText>
+            <ThemedView className="bg-white rounded-2xl p-4 mt-3 border border-slate-200">
+                <View className="flex-row items-center gap-2 mb-2">
+                    <IconSymbol name="person.2.fill" size={16} color="#0f172a" />
+                    <ThemedText type="defaultSemiBold" className="text-slate-900">
+                        People Nearby
+                    </ThemedText>
                 </View>
 
                 {nearbyUsers.map(u => (
-                    <View key={u.id} style={styles.personItem}>
-                        <View style={{ position: 'relative' }}>
-                            <Image source={{ uri: u.image }} style={styles.avatar} />
-                            {u.isOnline && <View style={styles.onlineDotAvatar} />}
+                    <View key={u.id} className="flex-row items-center p-3 rounded-xl mb-2 bg-white border border-slate-200">
+                        <View className="relative">
+                            <Image
+                                source={{ uri: u.image }}
+                                placeholder={BLURHASH}
+                                contentFit="cover"
+                                cachePolicy="memory-disk"
+                                style={{ width: 48, height: 48, borderRadius: 24 }}
+                            />
+                            {u.isOnline && (
+                                <View className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white" />
+                            )}
                         </View>
 
-                        <View style={{ flex: 1 }}>
-                            <ThemedText type="defaultSemiBold">{u.name}, {u.age}</ThemedText>
-                            <View style={styles.row}>
-                                <IconSymbol name="mappin" size={12} color="#9aa0a6" />
-                                <ThemedText style={styles.personMeta}>{u.distance} km away</ThemedText>
+                        <View className="flex-1 ml-3">
+                            <ThemedText type="defaultSemiBold" className="text-slate-900">
+                                {u.name}, {u.age}
+                            </ThemedText>
+                            <View className="flex-row items-center mt-0.5">
+                                <IconSymbol name="mappin" size={12} color="#64748b" />
+                                <ThemedText className="ml-1 text-xs text-slate-500">{u.distance} km away</ThemedText>
                             </View>
                         </View>
 
-                        <View style={[styles.badge, { backgroundColor: u.isOnline ? 'rgba(34,197,94,0.15)' : 'rgba(156,163,175,0.15)' }]}>
-                            <ThemedText style={[styles.badgeText, { color: u.isOnline ? '#22c55e' : '#9ca3af' }]}>
+                        <View className={`px-2 py-1 rounded-full ${u.isOnline ? 'bg-emerald-50' : 'bg-slate-100'}`}>
+                            <ThemedText className={`text-xs ${u.isOnline ? 'text-emerald-700' : 'text-slate-600'}`}>
                                 {u.isOnline ? 'Online' : 'Offline'}
                             </ThemedText>
                         </View>
@@ -165,14 +203,19 @@ export default function TabThreeScreen() {
             </ThemedView>
 
             {/* Popular Areas */}
-            <ThemedView style={styles.card}>
-                <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>Popular Areas</ThemedText>
-                <View style={styles.grid}>
+            <ThemedView className="bg-white rounded-2xl p-4 mt-3 mb-4 border border-slate-200">
+                <ThemedText type="defaultSemiBold" className="text-slate-900 mb-3">
+                    Popular Areas
+                </ThemedText>
+
+                <View className="flex-row flex-wrap -mx-1">
                     {locations.map((loc, i) => (
-                        <View key={i} style={styles.gridItem}>
-                            <ThemedText type="defaultSemiBold">{loc.name}</ThemedText>
-                            <ThemedText type="subtitle" style={{ color: '#ff37ad' }}>{loc.count}</ThemedText>
-                            <ThemedText style={styles.mutedText}>{loc.distance}</ThemedText>
+                        <View key={i} className="w-1/2 px-1 mb-2">
+                            <View className="items-center p-3 rounded-xl bg-white border border-slate-200">
+                                <ThemedText type="defaultSemiBold" className="text-slate-900">{loc.name}</ThemedText>
+                                <ThemedText className="text-2xl font-extrabold text-pink-600">{loc.count}</ThemedText>
+                                <ThemedText className="text-xs text-slate-500">{loc.distance}</ThemedText>
+                            </View>
                         </View>
                     ))}
                 </View>
@@ -181,87 +224,4 @@ export default function TabThreeScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    headerWrap: { height: 220, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, overflow: 'hidden' },
-    headerPhoto: { width: '100%', height: '100%' },
-
-    premiumPill: {
-        position: 'absolute', top: 12, left: 12,
-        backgroundColor: '#5b6cff', paddingHorizontal: 10, paddingVertical: 6,
-        borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 6,
-    },
-    premiumText: { color: '#fff', fontSize: 12 },
-
-    headerActions: { position: 'absolute', top: 12, right: 12, flexDirection: 'row', gap: 8 },
-    headerIconBtn: {
-        backgroundColor: 'rgba(0,0,0,0.55)', paddingHorizontal: 10, paddingVertical: 8, borderRadius: 16,
-    },
-
-    card: { backgroundColor: '#181a20', borderRadius: 20, padding: 16, marginTop: 12, gap: 10 },
-    rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-
-    editChip: { backgroundColor: '#22242a', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, flexDirection: 'row', alignItems: 'center', gap: 6 },
-    editChipText: { color: '#fff', fontSize: 13 },
-
-    titleText: { fontSize: 18, fontWeight: '800' },
-    mutedText: { color: '#9aa0a6', fontSize: 12 },
-
-    toggleLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    toggleTitle: { fontSize: 16, color: '#fff' },
-    dot: { width: 8, height: 8, borderRadius: 4 },
-
-    mapBox: {
-        aspectRatio: 1, borderRadius: 20, overflow: 'hidden',
-        backgroundColor: '#e5f2ff',
-    },
-    mapLayer: {
-        position: 'absolute', inset: 0, opacity: 0.6,
-    },
-    pin: {
-        position: 'absolute', width: 48, height: 48, borderRadius: 24,
-        borderWidth: 4, borderColor: '#fff', overflow: 'hidden',
-    },
-    pinRing: { shadowColor: '#22c55e', shadowOpacity: 0.7, shadowRadius: 6, shadowOffset: { width: 0, height: 0 } },
-    onlineDot: {
-        position: 'absolute', top: -2, right: -2,
-        width: 14, height: 14, borderRadius: 7, backgroundColor: '#22c55e',
-        borderWidth: 2, borderColor: '#fff',
-    },
-    centerDot: {
-        position: 'absolute', left: '50%', top: '50%',
-        width: 12, height: 12, marginLeft: -6, marginTop: -6,
-        borderRadius: 6, backgroundColor: '#6c66ff', borderWidth: 4, borderColor: '#fff',
-    },
-
-    mapCaption: { marginTop: 10, alignSelf: 'center', flexDirection: 'row', alignItems: 'center' },
-    captionText: { marginLeft: 6, fontSize: 12, color: '#9aa0a6' },
-
-    sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-    sectionTitle: { fontSize: 16 },
-
-    personItem: {
-        flexDirection: 'row', alignItems: 'center', padding: 12,
-        borderRadius: 14, backgroundColor: '#1d1f26', borderWidth: StyleSheet.hairlineWidth, borderColor: '#262a31',
-        marginBottom: 10,
-    },
-    avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#22252b' },
-    onlineDotAvatar: {
-        position: 'absolute', top: -2, right: -2,
-        width: 14, height: 14, borderRadius: 7, backgroundColor: '#22c55e',
-        borderWidth: 2, borderColor: '#1d1f26',
-    },
-    row: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
-    personMeta: { color: '#9aa0a6', fontSize: 12, marginLeft: 4 },
-
-    badge: {
-        paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999,
-    },
-
-    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 8 },
-    gridItem: {
-        flexGrow: 1, flexBasis: '48%',
-        padding: 12, borderRadius: 14, backgroundColor: '#1d1f26',
-        borderWidth: StyleSheet.hairlineWidth, borderColor: '#262a31',
-        alignItems: 'center',
-    },
-});
+const styles = StyleSheet.create({});
