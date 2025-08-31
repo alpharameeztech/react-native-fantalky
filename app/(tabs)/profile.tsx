@@ -1,105 +1,101 @@
 // app/(tabs)/four.tsx
-import React from 'react';
-import { StyleSheet, View, Pressable, Dimensions } from 'react-native';
-import { Image } from 'expo-image';
+import React from "react";
+import { Dimensions, Pressable, View, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 
-const { width } = Dimensions.get('window');
-
-// simple tokens for consistent contrast on dark UI
-const TOKENS = {
-    cardBg: '#14161c',
-    cardBgAlt: '#181a20',
-    border: '#2a2e36',
-    text: '#f2f4f8',
-    textMuted: '#c7cdd4',
-    accent: '#ff37ad',
-    accentSoftBg: 'rgba(255,55,173,0.16)',
-    accentSoftBorder: 'rgba(255,55,173,0.28)',
-    chipText: '#ff9bd1',
-};
-
-const dummyProfile = {
-    name: 'Alex',
-    age: 28,
-    location: 'New York, NY',
-    bio:
-        'Adventure seeker, coffee lover, and dog parent. Looking for genuine connections and shared experiences.',
-    occupation: 'Software Engineer',
-    // dummy images only, no backend calls
-    images: [
-        'https://images.unsplash.com/photo-1544006659-f0b21884ce1d?w=800&h=1200&fit=crop',
-        'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&h=1200&fit=crop',
-        'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=800&h=1200&fit=crop',
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&h=1200&fit=crop',
-        'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800&h=1200&fit=crop',
-        'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=800&h=1200&fit=crop',
-    ],
-    interests: ['Photography', 'Hiking', 'Coffee', 'Travel', 'Music', 'Cooking'],
-    stats: { matches: 124, likes: 89, superLikes: 12 },
-};
-
+const { width } = Dimensions.get("window");
 const GRID_COLS = 3;
 const GAP = 8;
 const H_MARGIN = 24;
 const TILE_W = (width - H_MARGIN * 2 - GAP * (GRID_COLS - 1)) / GRID_COLS;
 
+const BLURHASH = "L6Pj0^i_.AyE_3t7t7R**0o#DgR4";
+
+const profile = {
+    name: "Alex",
+    age: 28,
+    location: "New York, NY",
+    bio:
+        "Adventure seeker, coffee lover, and dog parent. Looking for genuine connections and shared experiences.",
+    occupation: "Software Engineer",
+    images: [
+        "https://images.unsplash.com/photo-1544006659-f0b21884ce1d?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?auto=format&fit=crop&w=800&q=80",
+    ],
+    interests: ["Photography", "Hiking", "Coffee", "Travel", "Music", "Cooking"],
+    stats: { matches: 124, likes: 89, superLikes: 12 },
+};
+
 export default function TabFourScreen() {
     return (
         <ParallaxScrollView
-            headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+            headerBackgroundColor={{ light: "#f3f4f6", dark: "#0b1220" }}
             headerImage={
-                <ThemedView style={styles.headerWrap}>
+                <ThemedView className="h-56 rounded-b-3xl overflow-hidden bg-slate-200 dark:bg-slate-800">
+                    {/* Banner image MUST use explicit style (not className) */}
                     <Image
                         source={{
-                            uri: 'https://images.unsplash.com/photo-1520975930498-0f8d7a6a1533?q=80&w=1600&auto=format&fit=crop',
+                            uri:
+                                "https://images.unsplash.com/photo-1520975930498-0f8d7a6a1533?auto=format&fit=crop&w=1600&q=80",
                         }}
+                        placeholder={BLURHASH}
                         contentFit="cover"
-                        style={styles.headerPhoto}
+                        priority="high"
+                        cachePolicy="disk"
+                        style={StyleSheet.absoluteFillObject}
+                        onError={(e) => console.warn("Header image failed:", e.nativeEvent)}
                     />
+                    <View className="absolute inset-0 bg-black/15" />
 
-                    {/* Title pill */}
-                    <ThemedView style={styles.headerPill}>
+                    <ThemedView className="absolute top-3 left-3 bg-indigo-600 px-3 py-1.5 rounded-full flex-row items-center gap-1.5">
                         <IconSymbol name="person.crop.circle.fill" size={16} color="#fff" />
-                        <ThemedText type="defaultSemiBold" style={styles.headerPillText}>
+                        <ThemedText type="defaultSemiBold" className="text-white text-xs">
                             My Profile
                         </ThemedText>
                     </ThemedView>
 
-                    {/* Actions */}
-                    <View style={styles.headerActions}>
-                        <Pressable style={styles.headerIconBtn}>
+                    <View className="absolute top-3 right-3 flex-row gap-2">
+                        <Pressable className="bg-black/40 px-3 py-2 rounded-xl">
                             <IconSymbol name="gearshape.fill" size={18} color="#fff" />
                         </Pressable>
-                        <Pressable style={styles.headerIconBtn}>
+                        <Pressable className="bg-black/40 px-3 py-2 rounded-xl">
                             <IconSymbol name="camera.fill" size={18} color="#fff" />
                         </Pressable>
                     </View>
                 </ThemedView>
             }
         >
-            {/* Images grid */}
-            <ThemedView style={[styles.card, { padding: 12 }]}>
-                <View style={styles.gridRow}>
-                    {dummyProfile.images.map((uri, i) => (
+            {/* Photo grid */}
+            <ThemedView className="bg-white dark:bg-[#14161c] rounded-2xl p-3 mt-3 border border-slate-200 dark:border-white/10 mx-6">
+                <View className="flex-row flex-wrap" style={{ gap: GAP }}>
+                    {profile.images.map((uri, i) => (
                         <View
                             key={i}
-                            style={[styles.tile, { width: TILE_W, height: TILE_W * 1.33 }]}
+                            className="rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900"
+                            style={{ width: TILE_W, height: TILE_W * 1.33 }}
                         >
                             <Image
                                 source={{ uri }}
-                                style={styles.tileImg}
+                                placeholder={BLURHASH}
                                 contentFit="cover"
+                                cachePolicy="disk"
                                 transition={150}
+                                style={{ width: "100%", height: "100%" }}
+                                onError={(e) =>
+                                    console.warn("Grid image failed:", uri, e.nativeEvent)
+                                }
                             />
                             {i === 0 && (
-                                <View style={styles.onlineDotWrap}>
-                                    <View style={styles.onlineDot} />
-                                </View>
+                                <View className="absolute top-1.5 left-1.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
                             )}
                         </View>
                     ))}
@@ -107,39 +103,53 @@ export default function TabFourScreen() {
             </ThemedView>
 
             {/* Info card */}
-            <ThemedView style={styles.card}>
-                <View style={styles.rowBetween}>
-                    <View style={{ flex: 1, paddingRight: 12 }}>
-                        <ThemedText type="title" style={styles.title}>
-                            {dummyProfile.name}, {dummyProfile.age}
+            <ThemedView className="bg-white dark:bg-[#14161c] rounded-2xl p-4 mt-3 border border-slate-200 dark:border-white/10 mx-6">
+                <View className="flex-row items-center justify-between">
+                    <View className="flex-1 pr-3">
+                        <ThemedText type="title" className="text-slate-900 dark:text-slate-100">
+                            {profile.name}, {profile.age}
                         </ThemedText>
-                        <View style={styles.locRow}>
-                            <IconSymbol name="mappin.and.ellipse" size={14} color={TOKENS.textMuted} />
-                            <ThemedText style={styles.muted}>{dummyProfile.location}</ThemedText>
+                        <View className="flex-row items-center mt-1">
+                            <IconSymbol name="mappin.and.ellipse" size={14} color="#94a3b8" />
+                            <ThemedText className="ml-1.5 text-sm text-slate-500 dark:text-slate-400">
+                                {profile.location}
+                            </ThemedText>
                         </View>
                     </View>
 
-                    <Pressable style={styles.iconChip}>
+                    <Pressable className="bg-slate-400 dark:bg-white/10 border border-slate-200 dark:border-white/20 px-3 py-2 rounded-lg flex-row items-center gap-1.5">
                         <IconSymbol name="pencil" size={14} color="#fff" />
-                        <ThemedText type="defaultSemiBold" style={styles.iconChipText}>
+                        <ThemedText type="defaultSemiBold" className="text-white text-xs">
                             Edit
                         </ThemedText>
                     </Pressable>
                 </View>
 
-                <ThemedText style={styles.bio}>{dummyProfile.bio}</ThemedText>
-                <ThemedText type="defaultSemiBold" style={styles.occupation}>
-                    {dummyProfile.occupation}
+                <ThemedText className="text-slate-700 dark:text-slate-300 mt-3 leading-5">
+                    {profile.bio}
                 </ThemedText>
 
-                {/* Interests */}
-                <ThemedText type="defaultSemiBold" style={styles.sectionHeading}>
+                <ThemedText
+                    type="defaultSemiBold"
+                    className="text-slate-900 dark:text-slate-100 mt-3"
+                >
+                    {profile.occupation}
+                </ThemedText>
+
+                <ThemedText
+                    type="defaultSemiBold"
+                    className="text-slate-900 dark:text-slate-100 mt-4 mb-2"
+                >
                     Interests
                 </ThemedText>
-                <View style={styles.chipsWrap}>
-                    {dummyProfile.interests.map((tag, idx) => (
-                        <View key={idx} style={styles.chip}>
-                            <ThemedText type="defaultSemiBold" style={styles.chipText}>
+                <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+                    {profile.interests.map((tag, idx) => (
+                        <View
+                            key={idx}
+                            className="px-3 py-1.5 rounded-full border bg-pink-50 border-pink-200
+                         dark:bg-pink-950/40 dark:border-pink-500/30"
+                        >
+                            <ThemedText className="text-pink-700 dark:text-pink-300 text-xs">
                                 {tag}
                             </ThemedText>
                         </View>
@@ -148,44 +158,50 @@ export default function TabFourScreen() {
             </ThemedView>
 
             {/* Stats */}
-            <View style={styles.statsRow}>
-                <ThemedView style={styles.statCard}>
+            <View className="flex-row gap-2 mx-6 mt-3">
+                <ThemedView className="flex-1 bg-white dark:bg-[#14161c] rounded-xl items-center py-3 border border-slate-200 dark:border-white/10">
                     <IconSymbol name="heart.fill" size={18} color="#ef4444" />
-                    <ThemedText type="subtitle" style={styles.statValue}>
-                        {dummyProfile.stats.matches}
+                    <ThemedText type="subtitle" className="text-pink-600 dark:text-pink-400 mt-1">
+                        {profile.stats.matches}
                     </ThemedText>
-                    <ThemedText style={styles.statLabel}>Matches</ThemedText>
+                    <ThemedText className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Matches
+                    </ThemedText>
                 </ThemedView>
 
-                <ThemedView style={styles.statCard}>
+                <ThemedView className="flex-1 bg-white dark:bg-[#14161c] rounded-xl items-center py-3 border border-slate-200 dark:border-white/10">
                     <IconSymbol name="message.fill" size={18} color="#3b82f6" />
-                    <ThemedText type="subtitle" style={styles.statValue}>
-                        {dummyProfile.stats.likes}
+                    <ThemedText type="subtitle" className="text-pink-600 dark:text-pink-400 mt-1">
+                        {profile.stats.likes}
                     </ThemedText>
-                    <ThemedText style={styles.statLabel}>Likes</ThemedText>
+                    <ThemedText className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Likes
+                    </ThemedText>
                 </ThemedView>
 
-                <ThemedView style={styles.statCard}>
+                <ThemedView className="flex-1 bg-white dark:bg-[#14161c] rounded-xl items-center py-3 border border-slate-200 dark:border-white/10">
                     <IconSymbol name="star.fill" size={18} color="#f59e0b" />
-                    <ThemedText type="subtitle" style={styles.statValue}>
-                        {dummyProfile.stats.superLikes}
+                    <ThemedText type="subtitle" className="text-pink-600 dark:text-pink-400 mt-1">
+                        {profile.stats.superLikes}
                     </ThemedText>
-                    <ThemedText style={styles.statLabel}>Super Likes</ThemedText>
+                    <ThemedText className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Super Likes
+                    </ThemedText>
                 </ThemedView>
             </View>
 
             {/* Actions */}
-            <ThemedView style={[styles.card, { gap: 10 }]}>
-                <Pressable style={styles.primaryBtn}>
+            <ThemedView className="bg-white dark:bg-[#14161c] rounded-2xl p-4 mt-3 border border-slate-200 dark:border-white/10 mx-6 mb-6">
+                <Pressable className="bg-pink-600 dark:bg-pink-500 rounded-xl py-3 flex-row items-center justify-center gap-2">
                     <IconSymbol name="camera.fill" size={16} color="#fff" />
-                    <ThemedText type="defaultSemiBold" style={styles.primaryBtnText}>
+                    <ThemedText type="defaultSemiBold" className="text-white">
                         Manage Photos
                     </ThemedText>
                 </Pressable>
 
-                <Pressable style={styles.secondaryBtn}>
-                    <IconSymbol name="gearshape.fill" size={16} color={TOKENS.accent} />
-                    <ThemedText type="defaultSemiBold" style={styles.secondaryBtnText}>
+                <Pressable className="mt-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/15 rounded-xl py-3 flex-row items-center justify-center gap-2">
+                    <IconSymbol name="gearshape.fill" size={16} color="#fb4593" />
+                    <ThemedText type="defaultSemiBold" className="text-pink-600 dark:text-pink-400">
                         Account Settings
                     </ThemedText>
                 </Pressable>
@@ -195,136 +211,5 @@ export default function TabFourScreen() {
 }
 
 const styles = StyleSheet.create({
-    // Header
-    headerWrap: {
-        height: 220,
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-        overflow: 'hidden',
-    },
-    headerPhoto: { width: '100%', height: '100%' },
-    headerPill: {
-        position: 'absolute',
-        top: 12,
-        left: 12,
-        backgroundColor: '#5b6cff',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    headerPillText: { color: '#fff', fontSize: 12 },
-    headerActions: {
-        position: 'absolute',
-        top: 12,
-        right: 12,
-        flexDirection: 'row',
-        gap: 8,
-    },
-    headerIconBtn: {
-        backgroundColor: 'rgba(0,0,0,0.55)',
-        paddingHorizontal: 10,
-        paddingVertical: 8,
-        borderRadius: 16,
-    },
-
-    // Cards and common
-    card: {
-        backgroundColor: TOKENS.cardBg,
-        borderRadius: 20,
-        padding: 16,
-        marginTop: 12,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-    },
-    rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    title: { fontSize: 24, fontWeight: '800', color: TOKENS.text },
-    muted: { color: TOKENS.textMuted, fontSize: 13, marginLeft: 6 },
-
-    bio: { color: TOKENS.text, opacity: 0.96, lineHeight: 20, marginTop: 8 },
-    occupation: { color: TOKENS.text, marginTop: 10 },
-    sectionHeading: { marginTop: 14, color: TOKENS.text },
-
-    // Location row
-    locRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
-
-    // Edit chip
-    iconChip: {
-        backgroundColor: TOKENS.cardBgAlt,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 10,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-    },
-    iconChipText: { color: '#fff', fontSize: 13 },
-
-    // Grid
-    gridRow: { flexDirection: 'row', flexWrap: 'wrap', gap: GAP, justifyContent: 'space-between' },
-    tile: { borderRadius: 16, overflow: 'hidden', backgroundColor: '#22252b' },
-    tileImg: { width: '100%', height: '100%' },
-    onlineDotWrap: { position: 'absolute', top: 6, left: 6 },
-    onlineDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: '#22c55e',
-        borderWidth: 2,
-        borderColor: '#fff',
-    },
-
-    // Interests chips
-    chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
-    chip: {
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 999,
-        backgroundColor: TOKENS.accentSoftBg,
-        borderWidth: 1,
-        borderColor: TOKENS.accentSoftBorder,
-    },
-    chipText: { color: TOKENS.chipText, fontSize: 12 },
-
-    // Stats
-    statsRow: { flexDirection: 'row', gap: 10, paddingHorizontal: H_MARGIN, marginTop: 12 },
-    statCard: {
-        flex: 1,
-        backgroundColor: TOKENS.cardBg,
-        borderRadius: 16,
-        paddingVertical: 12,
-        alignItems: 'center',
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-    },
-    statValue: { color: TOKENS.accent, marginTop: 4 },
-    statLabel: { color: TOKENS.textMuted, fontSize: 12, marginTop: 2 },
-
-    // Buttons
-    primaryBtn: {
-        backgroundColor: TOKENS.accent,
-        borderRadius: 14,
-        paddingVertical: 14,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-    },
-    primaryBtnText: { color: '#fff', fontSize: 15 },
-    secondaryBtn: {
-        backgroundColor: TOKENS.cardBgAlt,
-        borderRadius: 14,
-        paddingVertical: 14,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        borderWidth: 1,
-        borderColor: TOKENS.border,
-    },
-    secondaryBtnText: { color: TOKENS.accent, fontSize: 15 },
+    // just keeping a StyleSheet import available if you want to add RN-only styles later
 });
