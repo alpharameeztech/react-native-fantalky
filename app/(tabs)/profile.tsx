@@ -1,18 +1,11 @@
-// app/(tabs)/four.tsx
-import React from "react";
-import { Dimensions, Pressable, View, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { Pressable, View, StyleSheet, LayoutChangeEvent } from "react-native";
 import { Image } from "expo-image";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-
-const { width } = Dimensions.get("window");
-const GRID_COLS = 3;
-const GAP = 8;
-const H_MARGIN = 24;
-const TILE_W = (width - H_MARGIN * 2 - GAP * (GRID_COLS - 1)) / GRID_COLS;
 
 const BLURHASH = "L6Pj0^i_.AyE_3t7t7R**0o#DgR4";
 
@@ -35,13 +28,26 @@ const profile = {
     stats: { matches: 124, likes: 89, superLikes: 12 },
 };
 
+const COLS = 3;
+const ROW_GAP = 8; // vertical gap between rows
+
 export default function TabFourScreen() {
+    const [gridW, setGridW] = useState(0);
+
+    const onGridLayout = (e: LayoutChangeEvent) => {
+        setGridW(Math.round(e.nativeEvent.layout.width)); // width INSIDE the padded card
+    };
+
+    // Once we know the grid width, compute a tile width that lets 3 columns fit exactly.
+    const tileW =
+        gridW > 0 ? Math.floor((gridW - (COLS - 1) * ROW_GAP) / COLS) : 0;
+    const tileH = Math.round(tileW * 1.33);
+
     return (
         <ParallaxScrollView
             headerBackgroundColor={{ light: "#f3f4f6", dark: "#0b1220" }}
             headerImage={
                 <ThemedView className="h-56 rounded-b-3xl overflow-hidden bg-slate-200 dark:bg-slate-800">
-                    {/* Banner image MUST use explicit style (not className) */}
                     <Image
                         source={{
                             uri:
@@ -51,8 +57,8 @@ export default function TabFourScreen() {
                         contentFit="cover"
                         priority="high"
                         cachePolicy="disk"
+                        transition={0}
                         style={StyleSheet.absoluteFillObject}
-                        onError={(e) => console.warn("Header image failed:", e.nativeEvent)}
                     />
                     <View className="absolute inset-0 bg-black/15" />
 
@@ -76,23 +82,31 @@ export default function TabFourScreen() {
         >
             {/* Photo grid */}
             <ThemedView className="bg-white dark:bg-[#14161c] rounded-2xl p-3 mt-3 border border-slate-200 dark:border-white/10 mx-6">
-                <View className="flex-row flex-wrap" style={{ gap: GAP }}>
+                <View
+                    onLayout={onGridLayout}
+                    style={{
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                        justifyContent: "space-between", // creates the horizontal spacing
+                    }}
+                >
                     {profile.images.map((uri, i) => (
                         <View
                             key={i}
                             className="rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900"
-                            style={{ width: TILE_W, height: TILE_W * 1.33 }}
+                            style={{
+                                width: tileW || 0, // 0 until measured; RN will skip layout
+                                height: tileH || 0,
+                                marginBottom: ROW_GAP,
+                            }}
                         >
                             <Image
                                 source={{ uri }}
                                 placeholder={BLURHASH}
                                 contentFit="cover"
                                 cachePolicy="disk"
-                                transition={150}
-                                style={{ width: "100%", height: "100%" }}
-                                onError={(e) =>
-                                    console.warn("Grid image failed:", uri, e.nativeEvent)
-                                }
+                                transition={0}
+                                style={StyleSheet.absoluteFillObject}
                             />
                             {i === 0 && (
                                 <View className="absolute top-1.5 left-1.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
@@ -117,7 +131,7 @@ export default function TabFourScreen() {
                         </View>
                     </View>
 
-                    <Pressable className="bg-slate-400 dark:bg-white/10 border border-slate-200 dark:border-white/20 px-3 py-2 rounded-lg flex-row items-center gap-1.5">
+                    <Pressable className="bg-slate-900 dark:bg-white/10 border border-slate-200 dark:border-white/20 px-3 py-2 rounded-lg flex-row items-center gap-1.5">
                         <IconSymbol name="pencil" size={14} color="#fff" />
                         <ThemedText type="defaultSemiBold" className="text-white text-xs">
                             Edit
@@ -129,17 +143,11 @@ export default function TabFourScreen() {
                     {profile.bio}
                 </ThemedText>
 
-                <ThemedText
-                    type="defaultSemiBold"
-                    className="text-slate-900 dark:text-slate-100 mt-3"
-                >
+                <ThemedText type="defaultSemiBold" className="text-slate-900 dark:text-slate-100 mt-3">
                     {profile.occupation}
                 </ThemedText>
 
-                <ThemedText
-                    type="defaultSemiBold"
-                    className="text-slate-900 dark:text-slate-100 mt-4 mb-2"
-                >
+                <ThemedText type="defaultSemiBold" className="text-slate-900 dark:text-slate-100 mt-4 mb-2">
                     Interests
                 </ThemedText>
                 <View className="flex-row flex-wrap" style={{ gap: 8 }}>
@@ -211,5 +219,5 @@ export default function TabFourScreen() {
 }
 
 const styles = StyleSheet.create({
-    // just keeping a StyleSheet import available if you want to add RN-only styles later
+    // reserved for RN-only styles if needed
 });
