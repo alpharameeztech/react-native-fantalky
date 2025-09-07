@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Pressable, View, StyleSheet, LayoutChangeEvent } from "react-native";
+import React, { useState, useRef } from "react";
+import { Pressable, View, StyleSheet, LayoutChangeEvent, TextInput } from "react-native";
 import { Image } from "expo-image";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -29,19 +29,41 @@ const profile = {
 };
 
 const COLS = 3;
-const ROW_GAP = 8; // vertical gap between rows
+const ROW_GAP = 8;
 
 export default function TabFourScreen() {
     const [gridW, setGridW] = useState(0);
+    const [isEditing, setIsEditing] = useState(false);
+
+    // keep last saved values for Close
+    const savedFormRef = useRef({
+        name: profile.name,
+        age: String(profile.age),
+        location: profile.location,
+        bio: profile.bio,
+        occupation: profile.occupation,
+    });
+
+    const [form, setForm] = useState(savedFormRef.current);
 
     const onGridLayout = (e: LayoutChangeEvent) => {
-        setGridW(Math.round(e.nativeEvent.layout.width)); // width INSIDE the padded card
+        setGridW(Math.round(e.nativeEvent.layout.width));
     };
 
-    // Once we know the grid width, compute a tile width that lets 3 columns fit exactly.
-    const tileW =
-        gridW > 0 ? Math.floor((gridW - (COLS - 1) * ROW_GAP) / COLS) : 0;
+    const tileW = gridW > 0 ? Math.floor((gridW - (COLS - 1) * ROW_GAP) / COLS) : 0;
     const tileH = Math.round(tileW * 1.33);
+
+    const handleSave = () => {
+        console.log("Save clicked with data:", form);
+        savedFormRef.current = form;
+        setIsEditing(false);
+    };
+
+    const handleClose = () => {
+        console.log("Close clicked");
+        setForm(savedFormRef.current); // discard edits
+        setIsEditing(false);
+    };
 
     return (
         <ParallaxScrollView
@@ -84,21 +106,13 @@ export default function TabFourScreen() {
             <ThemedView className="bg-white dark:bg-[#14161c] rounded-2xl p-3 mt-3 border border-slate-200 dark:border-white/10 mx-6">
                 <View
                     onLayout={onGridLayout}
-                    style={{
-                        flexDirection: "row",
-                        flexWrap: "wrap",
-                        justifyContent: "space-between", // creates the horizontal spacing
-                    }}
+                    style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}
                 >
                     {profile.images.map((uri, i) => (
                         <View
                             key={i}
                             className="rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900"
-                            style={{
-                                width: tileW || 0, // 0 until measured; RN will skip layout
-                                height: tileH || 0,
-                                marginBottom: ROW_GAP,
-                            }}
+                            style={{ width: tileW || 0, height: tileH || 0, marginBottom: ROW_GAP }}
                         >
                             <Image
                                 source={{ uri }}
@@ -120,42 +134,101 @@ export default function TabFourScreen() {
             <ThemedView className="bg-white dark:bg-[#14161c] rounded-2xl p-4 mt-3 border border-slate-200 dark:border-white/10 mx-6">
                 <View className="flex-row items-center justify-between">
                     <View className="flex-1 pr-3">
-                        <ThemedText type="title" className="text-slate-900 dark:text-slate-100">
-                            {profile.name}, {profile.age}
-                        </ThemedText>
-                        <View className="flex-row items-center mt-1">
-                            <IconSymbol name="mappin.and.ellipse" size={14} color="#94a3b8" />
-                            <ThemedText className="ml-1.5 text-sm text-slate-500 dark:text-slate-400">
-                                {profile.location}
-                            </ThemedText>
-                        </View>
+                        {!isEditing ? (
+                            <>
+                                <ThemedText type="title" className="text-slate-900 dark:text-slate-100">
+                                    {form.name}, {form.age}
+                                </ThemedText>
+                                <View className="flex-row items-center mt-1">
+                                    <IconSymbol name="mappin.and.ellipse" size={14} color="#94a3b8" />
+                                    <ThemedText className="ml-1.5 text-sm text-slate-500 dark:text-slate-400">
+                                        {form.location}
+                                    </ThemedText>
+                                </View>
+                            </>
+                        ) : (
+                            <>
+                                <View className="flex-row gap-2">
+                                    <TextInput
+                                        value={form.name}
+                                        onChangeText={(t) => setForm((s) => ({ ...s, name: t }))}
+                                        placeholder="Name"
+                                        className="flex-1 px-3 py-2 rounded-lg border border-slate-300 dark:border-white/20 text-slate-900 dark:text-slate-100"
+                                    />
+                                    <TextInput
+                                        value={form.age}
+                                        onChangeText={(t) => setForm((s) => ({ ...s, age: t }))}
+                                        placeholder="Age"
+                                        keyboardType="number-pad"
+                                        className="w-20 px-3 py-2 rounded-lg border border-slate-300 dark:border-white/20 text-slate-900 dark:text-slate-100"
+                                    />
+                                </View>
+                                <TextInput
+                                    value={form.location}
+                                    onChangeText={(t) => setForm((s) => ({ ...s, location: t }))}
+                                    placeholder="Location"
+                                    className="mt-2 px-3 py-2 rounded-lg border border-slate-300 dark:border-white/20 text-slate-900 dark:text-slate-100"
+                                />
+                            </>
+                        )}
                     </View>
 
-                    <Pressable className="bg-slate-900 dark:bg-white/10 border border-slate-200 dark:border-white/20 px-3 py-2 rounded-lg flex-row items-center gap-1.5">
-                        <IconSymbol name="pencil" size={14} color="#fff" />
-                        <ThemedText type="defaultSemiBold" className="text-white text-xs">
-                            Edit
-                        </ThemedText>
-                    </Pressable>
+                    {/* Only show Edit when NOT editing (removed the header Save) */}
+                    {!isEditing && (
+                        <Pressable
+                            onPress={() => setIsEditing(true)}
+                            className="bg-slate-900 dark:bg-white/10 border border-slate-200 dark:border-white/20 px-3 py-2 rounded-lg flex-row items-center gap-1.5"
+                        >
+                            <IconSymbol name="pencil" size={14} color="#fff" />
+                            <ThemedText type="defaultSemiBold" className="text-white text-xs">
+                                Edit
+                            </ThemedText>
+                        </Pressable>
+                    )}
                 </View>
 
-                <ThemedText className="text-slate-700 dark:text-slate-300 mt-3 leading-5">
-                    {profile.bio}
-                </ThemedText>
+                {!isEditing ? (
+                    <>
+                        <ThemedText className="text-slate-700 dark:text-slate-300 mt-3 leading-5">
+                            {form.bio}
+                        </ThemedText>
 
-                <ThemedText type="defaultSemiBold" className="text-slate-900 dark:text-slate-100 mt-3">
-                    {profile.occupation}
-                </ThemedText>
+                        <ThemedText
+                            type="defaultSemiBold"
+                            className="text-slate-900 dark:text-slate-100 mt-3"
+                        >
+                            {form.occupation}
+                        </ThemedText>
+                    </>
+                ) : (
+                    <>
+                        <TextInput
+                            value={form.bio}
+                            onChangeText={(t) => setForm((s) => ({ ...s, bio: t }))}
+                            placeholder="Bio"
+                            multiline
+                            className="mt-3 px-3 py-2 rounded-lg border border-slate-300 dark:border-white/20 text-slate-900 dark:text-slate-100"
+                        />
+                        <TextInput
+                            value={form.occupation}
+                            onChangeText={(t) => setForm((s) => ({ ...s, occupation: t }))}
+                            placeholder="Occupation"
+                            className="mt-3 px-3 py-2 rounded-lg border border-slate-300 dark:border-white/20 text-slate-900 dark:text-slate-100"
+                        />
+                    </>
+                )}
 
-                <ThemedText type="defaultSemiBold" className="text-slate-900 dark:text-slate-100 mt-4 mb-2">
+                <ThemedText
+                    type="defaultSemiBold"
+                    className="text-slate-900 dark:text-slate-100 mt-4 mb-2"
+                >
                     Interests
                 </ThemedText>
                 <View className="flex-row flex-wrap" style={{ gap: 8 }}>
                     {profile.interests.map((tag, idx) => (
                         <View
                             key={idx}
-                            className="px-3 py-1.5 rounded-full border bg-pink-50 border-pink-200
-                         dark:bg-pink-950/40 dark:border-pink-500/30"
+                            className="px-3 py-1.5 rounded-full border bg-pink-50 border-pink-200 dark:bg-pink-950/40 dark:border-pink-500/30"
                         >
                             <ThemedText className="text-pink-700 dark:text-pink-300 text-xs">
                                 {tag}
@@ -163,6 +236,35 @@ export default function TabFourScreen() {
                         </View>
                     ))}
                 </View>
+
+                {/* Single Save/Close row below interests when editing */}
+                {isEditing && (
+                    <View className="flex-row gap-2 mt-4">
+                        <Pressable
+                            onPress={handleSave}
+                            className="flex-1 bg-emerald-600 dark:bg-emerald-500 rounded-lg py-3 items-center"
+                        >
+                            <View className="flex-row items-center gap-1.5">
+                                <IconSymbol name="checkmark.circle.fill" size={16} color="#fff" />
+                                <ThemedText type="defaultSemiBold" className="text-white">
+                                    Save
+                                </ThemedText>
+                            </View>
+                        </Pressable>
+
+                        <Pressable
+                            onPress={handleClose}
+                            className="flex-1 bg-slate-100 dark:bg-white/10 border border-slate-300 dark:border-white/20 rounded-lg py-3 items-center"
+                        >
+                            <View className="flex-row items-center gap-1.5">
+                                <IconSymbol name="xmark.circle.fill" size={16} color="#64748b" />
+                                <ThemedText type="defaultSemiBold" className="text-slate-600 dark:text-slate-300">
+                                    Close
+                                </ThemedText>
+                            </View>
+                        </Pressable>
+                    </View>
+                )}
             </ThemedView>
 
             {/* Stats */}
