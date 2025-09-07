@@ -1,5 +1,12 @@
 import React, { useState, useRef } from "react";
-import { Pressable, View, StyleSheet, LayoutChangeEvent, TextInput } from "react-native";
+import {
+    Pressable,
+    View,
+    StyleSheet,
+    LayoutChangeEvent,
+    TextInput,
+    useColorScheme,
+} from "react-native";
 import { Image } from "expo-image";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -34,8 +41,9 @@ const ROW_GAP = 8;
 export default function TabFourScreen() {
     const [gridW, setGridW] = useState(0);
     const [isEditing, setIsEditing] = useState(false);
+    const colorScheme = useColorScheme();
 
-    // keep last saved values for Close
+    // Keep last saved values for Close
     const savedFormRef = useRef({
         name: profile.name,
         age: String(profile.age),
@@ -173,14 +181,24 @@ export default function TabFourScreen() {
                         )}
                     </View>
 
-                    {/* Only show Edit when NOT editing (removed the header Save) */}
+                    {/* Only show Edit when NOT editing (header Save removed) */}
                     {!isEditing && (
                         <Pressable
                             onPress={() => setIsEditing(true)}
-                            className="bg-slate-900 dark:bg-white/10 border border-slate-200 dark:border-white/20 px-3 py-2 rounded-lg flex-row items-center gap-1.5"
+                            accessibilityRole="button"
+                            accessibilityLabel="Edit profile"
+                            android_ripple={{
+                                color:
+                                    colorScheme === "dark"
+                                        ? "rgba(255,255,255,0.2)"
+                                        : "rgba(255,255,255,0.15)",
+                                borderless: false,
+                            }}
+                            style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
+                            className="bg-gray-100 text-white dark:bg-white/10 border border-slate-200 dark:border-white/20 px-3 py-2 rounded-lg flex-row items-center gap-1.5"
                         >
-                            <IconSymbol name="pencil" size={14} color="#fff" />
-                            <ThemedText type="defaultSemiBold" className="text-white text-xs">
+                            <IconSymbol name="pencil" size={14} color="#000" />
+                            <ThemedText type="defaultSemiBold" className="text-slate-900 dark:text-white text-xs">
                                 Edit
                             </ThemedText>
                         </Pressable>
