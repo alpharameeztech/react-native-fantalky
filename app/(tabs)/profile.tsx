@@ -5,7 +5,7 @@ import {
     StyleSheet,
     LayoutChangeEvent,
     TextInput,
-    useColorScheme,
+    useColorScheme, TouchableOpacity,
 } from "react-native";
 import { Image } from "expo-image";
 
@@ -13,8 +13,10 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-
+import { useRouter } from "expo-router";
 const BLURHASH = "L6Pj0^i_.AyE_3t7t7R**0o#DgR4";
+
+const router = useRouter();
 
 // Static catalog of interests (10)
 const ALL_INTERESTS = [
@@ -453,12 +455,19 @@ export default function TabFourScreen() {
 
             {/* Actions */}
             <ThemedView className="bg-white dark:bg-[#14161c] rounded-2xl p-4 mt-3 border border-slate-200 dark:border-white/10 mx-6 mb-6">
-                <Pressable className="bg-pink-600 dark:bg-pink-500 rounded-xl py-3 flex-row items-center justify-center gap-2">
+                <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => router.push("/(tabs)/edit-photos")}
+                    accessibilityRole="button"
+                    accessibilityLabel="Manage Photos"
+                    className="bg-pink-600 dark:bg-pink-500 rounded-xl py-3 flex-row items-center justify-center gap-2"
+                >
                     <IconSymbol name="camera.fill" size={16} color="#fff" />
                     <ThemedText type="defaultSemiBold" className="text-white">
                         Manage Photos
                     </ThemedText>
-                </Pressable>
+                </TouchableOpacity>
+
 
                 <Pressable className="mt-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/15 rounded-xl py-3 flex-row items-center justify-center gap-2">
                     <IconSymbol name="gearshape.fill" size={16} color="#fb4593" />
