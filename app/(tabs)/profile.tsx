@@ -16,6 +16,20 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 
 const BLURHASH = "L6Pj0^i_.AyE_3t7t7R**0o#DgR4";
 
+// Static catalog of interests (10)
+const ALL_INTERESTS = [
+    "Photography",
+    "Hiking",
+    "Coffee",
+    "Travel",
+    "Music",
+    "Cooking",
+    "Reading",
+    "Gaming",
+    "Fitness",
+    "Art",
+];
+
 const profile = {
     name: "Alex",
     age: 28,
@@ -31,12 +45,13 @@ const profile = {
         "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80",
         "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?auto=format&fit=crop&w=800&q=80",
     ],
-    interests: ["Photography", "Hiking", "Coffee", "Travel", "Music", "Cooking"],
+    interests: ["Photography", "Hiking", "Coffee", "Travel", "Music"], // preselected (<=5)
     stats: { matches: 124, likes: 89, superLikes: 12 },
 };
 
 const COLS = 3;
 const ROW_GAP = 8;
+const MAX_INTERESTS = 5;
 
 export default function TabFourScreen() {
     const [gridW, setGridW] = useState(0);
@@ -50,6 +65,7 @@ export default function TabFourScreen() {
         location: profile.location,
         bio: profile.bio,
         occupation: profile.occupation,
+        interestsCsv: profile.interests.join(", "), // persisted as CSV for minimal change
     });
 
     const [form, setForm] = useState(savedFormRef.current);
@@ -71,6 +87,33 @@ export default function TabFourScreen() {
         console.log("Close clicked");
         setForm(savedFormRef.current); // discard edits
         setIsEditing(false);
+    };
+
+    // Derive selected interests from CSV
+    const selected: string[] =
+        form.interestsCsv
+            ?.split(",")
+            .map((s) => s.trim())
+            .filter(Boolean) ?? [];
+
+    // Ensure we render any preselected tags even if not in the base catalog (just in case)
+    const catalog = Array.from(new Set([...ALL_INTERESTS, ...selected]));
+
+    const isSelected = (tag: string) => selected.includes(tag);
+
+    const toggleInterest = (tag: string) => {
+        if (!isEditing) return;
+        if (isSelected(tag)) {
+            const next = selected.filter((t) => t !== tag);
+            setForm((s) => ({ ...s, interestsCsv: next.join(", ") }));
+        } else {
+            if (selected.length >= MAX_INTERESTS) {
+                console.log(`Max ${MAX_INTERESTS} interests allowed`);
+                return;
+            }
+            const next = [...selected, tag];
+            setForm((s) => ({ ...s, interestsCsv: next.join(", ") }));
+        }
     };
 
     return (
@@ -181,7 +224,7 @@ export default function TabFourScreen() {
                         )}
                     </View>
 
-                    {/* Only show Edit when NOT editing (header Save removed) */}
+                    {/* Edit button */}
                     {!isEditing && (
                         <Pressable
                             onPress={() => setIsEditing(true)}
@@ -195,9 +238,13 @@ export default function TabFourScreen() {
                                 borderless: false,
                             }}
                             style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
-                            className="bg-gray-100 text-white dark:bg-white/10 border border-slate-200 dark:border-white/20 px-3 py-2 rounded-lg flex-row items-center gap-1.5"
+                            className="bg-slate-200 dark:bg-white/10 border border-slate-200 dark:border-white/20 px-3 py-2 rounded-lg flex-row items-center gap-1.5"
                         >
-                            <IconSymbol name="pencil" size={14} color="#000" />
+                            <IconSymbol
+                                name="pencil"
+                                size={14}
+                                color={colorScheme === "dark" ? "#ffffff" : "#0f172a"}
+                            />
                             <ThemedText type="defaultSemiBold" className="text-slate-900 dark:text-white text-xs">
                                 Edit
                             </ThemedText>
@@ -236,23 +283,90 @@ export default function TabFourScreen() {
                     </>
                 )}
 
+                {/* Interests */}
                 <ThemedText
                     type="defaultSemiBold"
                     className="text-slate-900 dark:text-slate-100 mt-4 mb-2"
                 >
                     Interests
                 </ThemedText>
+
+                {/* Helper while editing */}
+                {isEditing && (
+                    <ThemedText className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                        Pick up to {MAX_INTERESTS} interests ({selected.length}/{MAX_INTERESTS})
+                    </ThemedText>
+                )}
+
+                {/* Chips:
+            - NOT editing: only render selected
+            - Editing: render whole catalog (selected + unselected)
+        */}
                 <View className="flex-row flex-wrap" style={{ gap: 8 }}>
-                    {profile.interests.map((tag, idx) => (
-                        <View
-                            key={idx}
-                            className="px-3 py-1.5 rounded-full border bg-pink-50 border-pink-200 dark:bg-pink-950/40 dark:border-pink-500/30"
-                        >
-                            <ThemedText className="text-pink-700 dark:text-pink-300 text-xs">
-                                {tag}
-                            </ThemedText>
-                        </View>
-                    ))}
+                    {(isEditing ? catalog : selected).map((tag) => {
+                        const selectedNow = isSelected(tag);
+
+                        if (selectedNow) {
+                            // Selected chip: blue + white text; tiny × only in edit mode
+                            return (
+                                <Pressable
+                                    key={tag}
+                                    onPress={() => toggleInterest(tag)}
+                                    disabled={!isEditing}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={
+                                        isEditing ? `Selected ${tag}, tap to remove` : `${tag}`
+                                    }
+                                    className="relative px-3 py-1.5 rounded-full border bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500"
+                                    style={{ paddingRight: isEditing ? 26 : 12 }}
+                                >
+                                    <ThemedText
+                                        className="text-white text-xs"
+                                        style={{ color: "#ffffff" }}
+                                    >
+                                        {tag}
+                                    </ThemedText>
+
+                                    {isEditing && (
+                                        <View
+                                            pointerEvents="none"
+                                            className="absolute -right-1 -top-1 w-5 h-5 rounded-full items-center justify-center border border-white/60 bg-blue-700 dark:bg-blue-600"
+                                            style={{ zIndex: 1 }}
+                                        >
+                                            <IconSymbol name="xmark" size={12} color="#ffffff" />
+                                        </View>
+                                    )}
+                                </Pressable>
+                            );
+                        }
+
+                        // Unselected chip (only appears when editing)
+                        return (
+                            <Pressable
+                                key={tag}
+                                onPress={() => toggleInterest(tag)}
+                                disabled={!isEditing}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Add ${tag}`}
+                                className={`px-3 py-1.5 rounded-full border ${
+                                    isEditing
+                                        ? "bg-slate-100 dark:bg-slate-900/40 border-slate-300 dark:border-white/20"
+                                        : "bg-slate-100/60 dark:bg-slate-900/20 border-slate-200 dark:border-white/10"
+                                }`}
+                            >
+                                <ThemedText className="text-slate-700 dark:text-slate-200 text-xs">
+                                    {tag}
+                                </ThemedText>
+                            </Pressable>
+                        );
+                    })}
+
+                    {/* If not editing and no selections, show a subtle hint */}
+                    {!isEditing && selected.length === 0 && (
+                        <ThemedText className="text-slate-500 dark:text-slate-400 text-xs">
+                            No interests selected.
+                        </ThemedText>
+                    )}
                 </View>
 
                 {/* Single Save/Close row below interests when editing */}
