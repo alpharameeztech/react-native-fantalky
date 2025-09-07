@@ -38,12 +38,12 @@ const profile = {
         "Adventure seeker, coffee lover, and dog parent. Looking for genuine connections and shared experiences.",
     occupation: "Software Engineer",
     images: [
-        "https://images.unsplash.com/photo-1544006659-f0b21884ce1d?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80",
-        "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1544006659-f0b21884ce1d?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?auto=format&fit=crop&w=1600&q=80",
     ],
     interests: ["Photography", "Hiking", "Coffee", "Travel", "Music"], // preselected (<=5)
     stats: { matches: 124, likes: 89, superLikes: 12 },
@@ -52,6 +52,10 @@ const profile = {
 const COLS = 3;
 const ROW_GAP = 8;
 const MAX_INTERESTS = 5;
+
+// Fallback for header if the user has no photos
+const HEADER_FALLBACK =
+    "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1600&q=80";
 
 export default function TabFourScreen() {
     const [gridW, setGridW] = useState(0);
@@ -121,10 +125,10 @@ export default function TabFourScreen() {
             headerBackgroundColor={{ light: "#f3f4f6", dark: "#0b1220" }}
             headerImage={
                 <ThemedView className="h-56 rounded-b-3xl overflow-hidden bg-slate-200 dark:bg-slate-800">
+                    {/* Use first profile image as header (fallback if missing) */}
                     <Image
                         source={{
-                            uri:
-                                "https://images.unsplash.com/photo-1520975930498-0f8d7a6a1533?auto=format&fit=crop&w=1600&q=80",
+                            uri: profile.images?.[0] ?? HEADER_FALLBACK,
                         }}
                         placeholder={BLURHASH}
                         contentFit="cover"
@@ -133,8 +137,22 @@ export default function TabFourScreen() {
                         transition={0}
                         style={StyleSheet.absoluteFillObject}
                     />
-                    <View className="absolute inset-0 bg-black/15" />
 
+                    {/* Theme-aware overlay: subtle in light, stronger in dark */}
+                    <View
+                        pointerEvents="none"
+                        style={[
+                            StyleSheet.absoluteFill,
+                            {
+                                backgroundColor:
+                                    colorScheme === "dark"
+                                        ? "rgba(0,0,0,0.35)"
+                                        : "rgba(0,0,0,0.10)",
+                            },
+                        ]}
+                    />
+
+                    {/* "My Profile" pill */}
                     <ThemedView className="absolute top-3 left-3 bg-indigo-600 px-3 py-1.5 rounded-full flex-row items-center gap-1.5">
                         <IconSymbol name="person.crop.circle.fill" size={16} color="#fff" />
                         <ThemedText type="defaultSemiBold" className="text-white text-xs">
@@ -142,6 +160,7 @@ export default function TabFourScreen() {
                         </ThemedText>
                     </ThemedView>
 
+                    {/* Top-right actions */}
                     <View className="absolute top-3 right-3 flex-row gap-2">
                         <Pressable className="bg-black/40 px-3 py-2 rounded-xl">
                             <IconSymbol name="gearshape.fill" size={18} color="#fff" />
