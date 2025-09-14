@@ -13,6 +13,7 @@ const PAGE_PAD = 24;
 const GAP = 12;
 const TILE_W = (width - PAGE_PAD * 2 - GAP) / 2;
 const TILE_H = TILE_W * (4 / 3);
+const MAX_PHOTOS = 6;
 
 const TOKENS = {
     card: '#14161c',
@@ -46,6 +47,7 @@ export default function TabNineScreen() {
     ]);
 
     const filled = useMemo(() => photos.filter(p => !!p.url), [photos]);
+    const canAddMore = filled.length < MAX_PHOTOS;
 
     const handleSetMainPhoto = (photoId: string) => {
         setPhotos(prev => prev.map(p => ({ ...p, isMain: p.id === photoId && p.url !== '' })));
@@ -56,7 +58,6 @@ export default function TabNineScreen() {
         console.log('DELETE_IMAGE:', { id: readableId, url: photo.url, index });
         setPhotos(prev => {
             const next = prev.map(p => (p.id === photo.id ? { ...p, url: '', isMain: false } : p));
-            // keep a main photo if any remain
             if (!next.some(p => p.isMain) && next.some(p => p.url)) {
                 const first = next.find(p => p.url);
                 if (first) first.isMain = true;
@@ -70,14 +71,12 @@ export default function TabNineScreen() {
             headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
             headerImage={
                 <ThemedView className="h-[200px] rounded-b-2xl overflow-hidden">
-                    {/* header image (unchanged) */}
                     <Image
                         source={{ uri: 'https://images.unsplash.com/photo-1520975930498-0f8d7a6a1533?q=80&w=1600&auto=format&fit=crop' }}
                         contentFit="cover"
                         className="w-full h-full"
                     />
 
-                    {/* header pill */}
                     <ThemedView
                         className="absolute top-3 left-3 rounded-full flex-row items-center px-2.5 py-1.5"
                         style={{ backgroundColor: '#5b6cff' }}
@@ -88,7 +87,6 @@ export default function TabNineScreen() {
                         </ThemedText>
                     </ThemedView>
 
-                    {/* header actions */}
                     <View className="absolute top-3 right-3 flex-row space-x-2">
                         <Pressable className="rounded-2xl px-2.5 py-2" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
                             <IconSymbol name="chevron.left" size={18} color="#fff" />
@@ -125,66 +123,74 @@ export default function TabNineScreen() {
                 style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
             >
                 <View className="flex-row flex-wrap justify-between" style={{ rowGap: GAP }}>
-                    {photos.map((photo, index) => (
+                    {/* Render only filled photos */}
+                    {filled.map((photo, index) => (
                         <View
                             key={photo.id}
                             className="rounded-xl overflow-hidden border"
                             style={{ width: TILE_W, height: TILE_H, backgroundColor: TOKENS.cardAlt, borderColor: TOKENS.border }}
                         >
                             <View className="flex-1">
-                                {photo.url ? (
-                                    <>
-                                        {/* tile image (unchanged) */}
-                                        <Image
-                                            source={{ uri: photo.url }}
-                                            style={StyleSheet.absoluteFillObject}
-                                            contentFit="cover"
-                                            transition={150}
-                                        />
+                                <>
+                                    {/* tile image (unchanged) */}
+                                    <Image
+                                        source={{ uri: photo.url }}
+                                        style={StyleSheet.absoluteFillObject}
+                                        contentFit="cover"
+                                        transition={150}
+                                    />
 
-                                        {photo.isMain && (
-                                            <View className="absolute top-2 left-2 rounded-full px-2 py-1" style={{ backgroundColor: TOKENS.accent }}>
-                                                <ThemedText className="text-white text-[11px] font-bold">Main</ThemedText>
-                                            </View>
-                                        )}
+                                    {photo.isMain && (
+                                        <View className="absolute top-2 left-2 rounded-full px-2 py-1" style={{ backgroundColor: TOKENS.accent }}>
+                                            <ThemedText className="text-white text-[11px] font-bold">Main</ThemedText>
+                                        </View>
+                                    )}
 
-                                        <View className="absolute top-2 right-2 flex-row" style={{ columnGap: 6 }}>
-                                            {!photo.isMain && (
-                                                <Pressable
-                                                    onPress={() => handleSetMainPhoto(photo.id)}
-                                                    className="items-center justify-center rounded-full"
-                                                    style={{ width: 30, height: 30, backgroundColor: '#ffffffE6' }}
-                                                >
-                                                    <IconSymbol name="star.fill" size={14} color="#f59e0b" />
-                                                </Pressable>
-                                            )}
+                                    <View className="absolute top-2 right-2 flex-row" style={{ columnGap: 6 }}>
+                                        {!photo.isMain && (
                                             <Pressable
-                                                onPress={() => handleDeletePhoto(photo, index)}
+                                                onPress={() => handleSetMainPhoto(photo.id)}
                                                 className="items-center justify-center rounded-full"
                                                 style={{ width: 30, height: 30, backgroundColor: '#ffffffE6' }}
                                             >
-                                                <IconSymbol name="xmark" size={14} color={TOKENS.danger} />
+                                                <IconSymbol name="star.fill" size={14} color="#f59e0b" />
                                             </Pressable>
-                                        </View>
-
-                                        <View
-                                            className="absolute left-2 bottom-2 w-6 h-6 rounded-full items-center justify-center"
-                                            style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
+                                        )}
+                                        <Pressable
+                                            onPress={() => handleDeletePhoto(photo, index)}
+                                            className="items-center justify-center rounded-full"
+                                            style={{ width: 30, height: 30, backgroundColor: '#ffffffE6' }}
                                         >
-                                            <ThemedText className="text-white text-xs font-bold">{index + 1}</ThemedText>
-                                        </View>
-                                    </>
-                                ) : (
-                                    <View className="flex-1 items-center justify-center">
-                                        <IconSymbol name="plus" size={26} color={TOKENS.textMuted} />
-                                        <ThemedText type="defaultSemiBold" className="mt-1.5 text-xs" style={{ color: TOKENS.textMuted }}>
-                                            Add Photo
-                                        </ThemedText>
+                                            <IconSymbol name="xmark" size={14} color={TOKENS.danger} />
+                                        </Pressable>
                                     </View>
-                                )}
+
+                                    <View
+                                        className="absolute left-2 bottom-2 w-6 h-6 rounded-full items-center justify-center"
+                                        style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
+                                    >
+                                        <ThemedText className="text-white text-xs font-bold">{index + 1}</ThemedText>
+                                    </View>
+                                </>
                             </View>
                         </View>
                     ))}
+
+                    {/* Single "Add Photo" tile at the END */}
+                    {canAddMore && (
+                        <View
+                            key="add-photo"
+                            className="rounded-xl overflow-hidden border items-center justify-center"
+                            style={{ width: TILE_W, height: TILE_H, backgroundColor: TOKENS.cardAlt, borderColor: TOKENS.border }}
+                        >
+                            <View className="flex-1 items-center justify-center">
+                                <IconSymbol name="plus" size={26} color={TOKENS.textMuted} />
+                                <ThemedText type="defaultSemiBold" className="mt-1.5 text-xs" style={{ color: TOKENS.textMuted }}>
+                                    Add Photo
+                                </ThemedText>
+                            </View>
+                        </View>
+                    )}
                 </View>
             </ThemedView>
 
@@ -243,7 +249,9 @@ export default function TabNineScreen() {
                         <View className="w-2 h-2 rounded-full mt-1.5" style={{ backgroundColor: TOKENS.danger }} />
                         <View>
                             <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>Don’t</ThemedText>
-                            <ThemedText style={{ color: TOKENS.textMuted }}>Use heavily filtered or misleading photos</ThemedText>
+                            <ThemedText style={{ color: TOKENS.textMuted }}>
+                                Use heavily filtered or misleading photos
+                            </ThemedText>
                         </View>
                     </View>
                 </View>
@@ -252,7 +260,7 @@ export default function TabNineScreen() {
             {/* Footer summary */}
             <ThemedView className="rounded-2xl p-4 mt-3 border items-center" style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}>
                 <ThemedText style={{ color: TOKENS.textMuted }}>
-                    {filled.length}/6 photos added · Pick your best as{' '}
+                    {filled.length}/{MAX_PHOTOS} photos added · Pick your best as{' '}
                     <ThemedText style={{ color: TOKENS.text }}>Main</ThemedText>
                 </ThemedText>
             </ThemedView>
