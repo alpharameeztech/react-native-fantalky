@@ -1,13 +1,11 @@
+// app/(tabs)/five.tsx (Settings)
 import React, { useState } from 'react';
-import { StyleSheet, View, Pressable, Switch, Dimensions } from 'react-native';
+import { View, Pressable, Switch, ScrollView } from 'react-native';
 import { Image } from 'expo-image';
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-
-const { width } = Dimensions.get('window');
 
 const TOKENS = {
     pagePad: 24,
@@ -17,8 +15,6 @@ const TOKENS = {
     text: '#f2f4f8',
     textMuted: '#c7cdd4',
     accent: '#ff37ad',
-    accentSoftBg: 'rgba(255,55,173,0.16)',
-    accentSoftBorder: 'rgba(255,55,173,0.28)',
 };
 
 type Item = { icon: string; label: string };
@@ -61,66 +57,66 @@ export default function TabFiveScreen() {
     const ageRangePct = 0.75;   // 75% (e.g., 22–35)
 
     return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-            headerImage={
-                <ThemedView style={styles.headerWrap}>
-                    <Image
-                        source={{ uri: 'https://images.unsplash.com/photo-1516542076529-1ea3854896e1?q=80&w=1600&auto=format&fit=crop' }}
-                        contentFit="cover"
-                        style={styles.headerPhoto}
-                    />
-
-                    {/* Title pill */}
-                    <ThemedView style={styles.headerPill}>
-                        <IconSymbol name="gearshape.fill" size={16} color="#fff" />
-                        <ThemedText type="defaultSemiBold" style={styles.headerPillText}>
-                            Settings
-                        </ThemedText>
-                    </ThemedView>
-
-                    {/* Back icon (UI only) */}
-                    <View style={styles.headerActions}>
-                        <Pressable style={styles.headerIconBtn}>
-                            <IconSymbol name="chevron.left" size={18} color="#fff" />
-                        </Pressable>
-                    </View>
-                </ThemedView>
-            }
+        <ScrollView
+            contentContainerStyle={{ paddingHorizontal: TOKENS.pagePad, paddingBottom: 24 }}
+            showsVerticalScrollIndicator={false}
         >
             {/* Profile Summary */}
-            <ThemedView style={[styles.card, { padding: 16 }]}>
-                <View style={styles.profileRow}>
+            <ThemedView
+                className="rounded-2xl mt-3 border p-4"
+                style={{ backgroundColor: TOKENS.cardBg, borderColor: TOKENS.border }}
+            >
+                <View className="flex-row items-center">
                     <Image
                         source={{ uri: 'https://images.unsplash.com/photo-1544006659-f0b21884ce1d?w=160&h=160&fit=crop' }}
-                        style={styles.avatar}
                         contentFit="cover"
                         transition={150}
+                        style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: '#22252b' }}
                     />
-                    <View style={{ flex: 1, marginLeft: 12 }}>
-                        <ThemedText type="defaultSemiBold" style={styles.titleText}>Alex, 28</ThemedText>
-                        <View style={styles.locRow}>
+                    <View className="flex-1 ml-3">
+                        <ThemedText type="defaultSemiBold" className="text-lg font-extrabold" style={{ color: TOKENS.text }}>
+                            Alex, 28
+                        </ThemedText>
+                        <View className="flex-row items-center mt-1">
                             <IconSymbol name="mappin.and.ellipse" size={14} color={TOKENS.textMuted} />
-                            <ThemedText style={styles.muted}>New York, NY</ThemedText>
+                            <ThemedText className="ml-1.5 text-[13px]" style={{ color: TOKENS.textMuted }}>
+                                New York, NY
+                            </ThemedText>
                         </View>
-                        <Pressable style={styles.viewProfileBtn}>
+
+                        <Pressable
+                            className="mt-2 self-start flex-row items-center rounded-full px-2.5 py-2 border"
+                            style={{ backgroundColor: TOKENS.cardBgAlt, borderColor: TOKENS.border }}
+                        >
                             <IconSymbol name="person.text.rectangle" size={14} color={TOKENS.accent} />
-                            <ThemedText type="defaultSemiBold" style={styles.viewProfileText}>View Profile</ThemedText>
+                            <ThemedText type="defaultSemiBold" className="ml-1.5 text-xs" style={{ color: TOKENS.accent }}>
+                                View Profile
+                            </ThemedText>
                         </Pressable>
                     </View>
                 </View>
             </ThemedView>
 
             {/* Quick Toggles */}
-            <ThemedView style={styles.card}>
-                <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>Quick Settings</ThemedText>
+            <ThemedView
+                className="rounded-2xl mt-3 border p-4"
+                style={{ backgroundColor: TOKENS.cardBg, borderColor: TOKENS.border }}
+            >
+                <ThemedText type="defaultSemiBold" className="mb-1.5 text-[15px]" style={{ color: TOKENS.text }}>
+                    Quick Settings
+                </ThemedText>
 
-                <View style={styles.toggleRow}>
-                    <View style={styles.toggleLeft}>
+                {/* Notifications */}
+                <View className="py-3 flex-row items-center justify-between">
+                    <View className="flex-row items-center" style={{ columnGap: 10 }}>
                         <IconSymbol name="bell" size={18} color={TOKENS.text} />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={styles.toggleTitle}>Push Notifications</ThemedText>
-                            <ThemedText style={styles.muted}>Get notified of new matches</ThemedText>
+                            <ThemedText type="defaultSemiBold" className="text-[15px]" style={{ color: TOKENS.text }}>
+                                Push Notifications
+                            </ThemedText>
+                            <ThemedText className="text-[13px]" style={{ color: TOKENS.textMuted }}>
+                                Get notified of new matches
+                            </ThemedText>
                         </View>
                     </View>
                     <Switch
@@ -131,12 +127,17 @@ export default function TabFiveScreen() {
                     />
                 </View>
 
-                <View style={styles.toggleRow}>
-                    <View style={styles.toggleLeft}>
+                {/* Location Sharing */}
+                <View className="py-3 flex-row items-center justify-between">
+                    <View className="flex-row items-center" style={{ columnGap: 10 }}>
                         <IconSymbol name="mappin.and.ellipse" size={18} color={TOKENS.text} />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={styles.toggleTitle}>Location Sharing</ThemedText>
-                            <ThemedText style={styles.muted}>Show me on the map</ThemedText>
+                            <ThemedText type="defaultSemiBold" className="text-[15px]" style={{ color: TOKENS.text }}>
+                                Location Sharing
+                            </ThemedText>
+                            <ThemedText className="text-[13px]" style={{ color: TOKENS.textMuted }}>
+                                Show me on the map
+                            </ThemedText>
                         </View>
                     </View>
                     <Switch
@@ -147,12 +148,17 @@ export default function TabFiveScreen() {
                     />
                 </View>
 
-                <View style={styles.toggleRow}>
-                    <View style={styles.toggleLeft}>
+                {/* Online Status */}
+                <View className="py-3 flex-row items-center justify-between">
+                    <View className="flex-row items-center" style={{ columnGap: 10 }}>
                         <IconSymbol name="person.crop.circle.badge.checkmark" size={18} color={TOKENS.text} />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={styles.toggleTitle}>Online Status</ThemedText>
-                            <ThemedText style={styles.muted}>Show when I&apos;m active</ThemedText>
+                            <ThemedText type="defaultSemiBold" className="text-[15px]" style={{ color: TOKENS.text }}>
+                                Online Status
+                            </ThemedText>
+                            <ThemedText className="text-[13px]" style={{ color: TOKENS.textMuted }}>
+                                Show when I&apos;m active
+                            </ThemedText>
                         </View>
                     </View>
                     <Switch
@@ -166,189 +172,102 @@ export default function TabFiveScreen() {
 
             {/* Settings Groups */}
             {settingsGroups.map((group, gi) => (
-                <ThemedView key={gi} style={styles.card}>
-                    <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>{group.title}</ThemedText>
+                <ThemedView
+                    key={gi}
+                    className="rounded-2xl mt-3 border p-4"
+                    style={{ backgroundColor: TOKENS.cardBg, borderColor: TOKENS.border }}
+                >
+                    <ThemedText type="defaultSemiBold" className="mb-1.5 text-[15px]" style={{ color: TOKENS.text }}>
+                        {group.title}
+                    </ThemedText>
 
-                    {group.items.map((item, ii) => (
-                        <Pressable key={ii} style={[styles.item, ii < group.items.length - 1 && styles.itemDivider]}>
-                            <View style={styles.itemLeft}>
-                                <View style={styles.itemIcon}>
-                                    <IconSymbol name={item.icon} size={18} color="#fff" />
+                    {group.items.map((item, ii) => {
+                        const isLast = ii === group.items.length - 1;
+                        return (
+                            <Pressable
+                                key={ii}
+                                className={`py-3 flex-row items-center justify-between ${!isLast ? 'border-b' : ''}`}
+                                style={!isLast ? { borderColor: TOKENS.border } : undefined}
+                            >
+                                <View className="flex-row items-center" style={{ columnGap: 12 }}>
+                                    <View
+                                        className="items-center justify-center rounded-lg"
+                                        style={{ width: 36, height: 36, backgroundColor: '#22252b' }}
+                                    >
+                                        <IconSymbol name={item.icon} size={18} color="#fff" />
+                                    </View>
+                                    <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>
+                                        {item.label}
+                                    </ThemedText>
                                 </View>
-                                <ThemedText type="defaultSemiBold" style={styles.itemText}>{item.label}</ThemedText>
-                            </View>
-                            <IconSymbol name="chevron.right" size={18} color={TOKENS.textMuted} />
-                        </Pressable>
-                    ))}
+                                <IconSymbol name="chevron.right" size={18} color={TOKENS.textMuted} />
+                            </Pressable>
+                        );
+                    })}
                 </ThemedView>
             ))}
 
-            {/* Discovery Settings (static bars, UI-only) */}
-            <ThemedView style={styles.card}>
-                <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>Discovery Settings</ThemedText>
+            {/* Discovery Settings (static bars) */}
+            <ThemedView
+                className="rounded-2xl mt-3 border p-4"
+                style={{ backgroundColor: TOKENS.cardBg, borderColor: TOKENS.border }}
+            >
+                <ThemedText type="defaultSemiBold" className="mb-1.5 text-[15px]" style={{ color: TOKENS.text }}>
+                    Discovery Settings
+                </ThemedText>
 
-                <View style={{ marginTop: 8 }}>
-                    <View style={styles.rowBetween}>
-                        <ThemedText style={styles.mutedStrong}>Maximum Distance</ThemedText>
-                        <ThemedText type="defaultSemiBold" style={{ color: TOKENS.accent }}>25 km</ThemedText>
+                {/* Max distance */}
+                <View className="mt-2">
+                    <View className="flex-row items-center justify-between">
+                        <ThemedText className="text-[13px]" style={{ color: TOKENS.textMuted }}>
+                            Maximum Distance
+                        </ThemedText>
+                        <ThemedText type="defaultSemiBold" style={{ color: TOKENS.accent }}>
+                            25 km
+                        </ThemedText>
                     </View>
-                    <View style={styles.progressTrack}>
-                        <View style={[styles.progressFill, { width: `${maxDistancePct * 100}%` }]} />
+                    <View
+                        className="w-full h-[10px] rounded-full overflow-hidden mt-1.5 border"
+                        style={{ backgroundColor: '#232730', borderColor: TOKENS.border }}
+                    >
+                        <View style={{ width: `${maxDistancePct * 100}%`, height: '100%', backgroundColor: TOKENS.accent }} />
                     </View>
                 </View>
 
-                <View style={{ marginTop: 12 }}>
-                    <View style={styles.rowBetween}>
-                        <ThemedText style={styles.mutedStrong}>Age Range</ThemedText>
-                        <ThemedText type="defaultSemiBold" style={{ color: TOKENS.accent }}>22 - 35</ThemedText>
+                {/* Age range */}
+                <View className="mt-3">
+                    <View className="flex-row items-center justify-between">
+                        <ThemedText className="text-[13px]" style={{ color: TOKENS.textMuted }}>
+                            Age Range
+                        </ThemedText>
+                        <ThemedText type="defaultSemiBold" style={{ color: TOKENS.accent }}>
+                            22 - 35
+                        </ThemedText>
                     </View>
-                    <View style={styles.progressTrack}>
-                        <View style={[styles.progressFill, { width: `${ageRangePct * 100}%` }]} />
+                    <View
+                        className="w-full h-[10px] rounded-full overflow-hidden mt-1.5 border"
+                        style={{ backgroundColor: '#232730', borderColor: TOKENS.border }}
+                    >
+                        <View style={{ width: `${ageRangePct * 100}%`, height: '100%', backgroundColor: TOKENS.accent }} />
                     </View>
                 </View>
             </ThemedView>
 
             {/* Logout */}
-            <ThemedView style={styles.card}>
-                <Pressable style={styles.logoutBtn}>
+            <ThemedView
+                className="rounded-2xl mt-3 border p-4"
+                style={{ backgroundColor: TOKENS.cardBg, borderColor: TOKENS.border }}
+            >
+                <Pressable
+                    className="flex-row items-center justify-center gap-2 py-3 rounded-xl border"
+                    style={{ backgroundColor: '#1d1f26', borderColor: TOKENS.border }}
+                >
                     <IconSymbol name="rectangle.portrait.and.arrow.right" size={18} color="#ff3b30" />
-                    <ThemedText type="defaultSemiBold" style={styles.logoutText}>Sign Out</ThemedText>
+                    <ThemedText type="defaultSemiBold" className="text-[15px]" style={{ color: '#ff3b30' }}>
+                        Sign Out
+                    </ThemedText>
                 </Pressable>
             </ThemedView>
-        </ParallaxScrollView>
+        </ScrollView>
     );
 }
-
-const styles = StyleSheet.create({
-    // Header
-    headerWrap: {
-        height: 180,
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-        overflow: 'hidden',
-    },
-    headerPhoto: { width: '100%', height: '100%' },
-    headerPill: {
-        position: 'absolute',
-        top: 12,
-        left: 12,
-        backgroundColor: '#5b6cff',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    headerPillText: { color: '#fff', fontSize: 12 },
-    headerActions: { position: 'absolute', top: 12, right: 12, flexDirection: 'row', gap: 8 },
-    headerIconBtn: {
-        backgroundColor: 'rgba(0,0,0,0.55)',
-        paddingHorizontal: 10,
-        paddingVertical: 8,
-        borderRadius: 16,
-    },
-
-    // Cards
-    card: {
-        backgroundColor: TOKENS.cardBg,
-        borderRadius: 20,
-        padding: 16,
-        marginTop: 12,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-    },
-
-    // Profile summary
-    profileRow: { flexDirection: 'row', alignItems: 'center' },
-    avatar: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: '#22252b',
-    },
-    titleText: { color: TOKENS.text, fontSize: 18, fontWeight: '800' },
-    locRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
-    muted: { color: TOKENS.textMuted, fontSize: 13, marginLeft: 6 },
-    mutedStrong: { color: TOKENS.textMuted, fontSize: 13 },
-
-    viewProfileBtn: {
-        marginTop: 8,
-        alignSelf: 'flex-start',
-        paddingHorizontal: 10,
-        paddingVertical: 8,
-        borderRadius: 999,
-        backgroundColor: TOKENS.cardBgAlt,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    viewProfileText: { color: TOKENS.accent, fontSize: 12 },
-
-    // Toggles
-    sectionTitle: { color: TOKENS.text, fontSize: 15, marginBottom: 6 },
-    toggleRow: {
-        paddingVertical: 12,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    toggleLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    toggleTitle: { color: TOKENS.text, fontSize: 15 },
-
-    // Settings items
-    item: {
-        paddingVertical: 12,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    itemDivider: {
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: TOKENS.border,
-    },
-    itemLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    itemIcon: {
-        width: 36,
-        height: 36,
-        borderRadius: 10,
-        backgroundColor: '#22252b',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    itemText: { color: TOKENS.text },
-
-    // Progress bars (static, UI-only)
-    progressTrack: {
-        width: '100%',
-        height: 10,
-        borderRadius: 999,
-        backgroundColor: '#232730',
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-        overflow: 'hidden',
-        marginTop: 6,
-    },
-    progressFill: {
-        height: '100%',
-        backgroundColor: TOKENS.accent,
-        borderTopRightRadius: 999,
-        borderBottomRightRadius: 999,
-    },
-
-    // Logout
-    logoutBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        paddingVertical: 12,
-        backgroundColor: '#1d1f26',
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: TOKENS.border,
-    },
-    logoutText: { color: '#ff3b30', fontSize: 15 },
-});
