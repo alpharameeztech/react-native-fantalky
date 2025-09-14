@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { StyleSheet, View, Pressable, Dimensions, Alert } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import * as Device from 'expo-device';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -69,8 +70,7 @@ export default function TabNineScreen() {
         });
     };
 
-    // ---- Add / upload flow ----
-    // Stub "backend" upload — logs and returns the provided URI.
+    // ---- Add / upload flow (upload is stubbed/logged) ----
     const processPhotoOnBackend = async (localUri: string) => {
         console.log('UPLOAD_TO_BACKEND_START', { localUri });
         // TODO: replace with your real API call; return remote URL from server
@@ -78,7 +78,6 @@ export default function TabNineScreen() {
         return localUri;
     };
 
-    // Insert a URI into the first empty slot if present; otherwise append.
     const addUriToGrid = (uri: string) => {
         setPhotos(prev => {
             const currentCount = prev.filter(p => p.url).length;
@@ -100,41 +99,13 @@ export default function TabNineScreen() {
         });
     };
 
-    const handleAddFromCamera = async () => {
-        try {
-            if (!canAddMore) return;
-
-            const cam = await ImagePicker.requestCameraPermissionsAsync();
-            if (!cam.granted) {
-                Alert.alert('Permission needed', 'Camera permission is required to take a photo.');
-                return;
-            }
-
-            const result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ['images'],
-                allowsEditing: true,
-                aspect: [3, 4],
-                quality: 0.9,
-            });
-            console.log('CAMERA_RESULT', result);
-
-            if (!result.canceled && result.assets?.[0]?.uri) {
-                const localUri = result.assets[0].uri;
-                const uploaded = await processPhotoOnBackend(localUri);
-                addUriToGrid(uploaded);
-            }
-        } catch (e) {
-            console.warn('handleAddFromCamera error', e);
-            Alert.alert('Error', 'Could not capture photo.');
-        }
-    };
-
+    // Gallery picker (unchanged behavior for Add Photo tile)
     const handlePickFromGallery = async () => {
         try {
             if (!canAddMore) return;
 
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ['images'],      // ✅ new API uses string literals
+                mediaTypes: ['images'], // ✅ new API uses string literals
                 allowsEditing: true,
                 aspect: [3, 4],
                 quality: 0.9,
@@ -152,7 +123,43 @@ export default function TabNineScreen() {
             Alert.alert('Error', 'Could not pick a photo.');
         }
     };
-    // ---------------------------
+
+    // Take a picture then upload then show it
+    const handleAddFromCamera = async () => {
+        try {
+            if (!canAddMore) return;
+
+            // Simulator-safe fallback
+            if (!Device.isDevice) {
+                Alert.alert('Camera not available in simulator', 'Opening gallery instead.');
+                return handlePickFromGallery();
+            }
+
+            const cam = await ImagePicker.requestCameraPermissionsAsync();
+            if (!cam.granted) {
+                Alert.alert('Permission needed', 'Camera permission is required to take a photo.');
+                return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ['images'], // ✅ string literal
+                allowsEditing: true,
+                aspect: [3, 4],
+                quality: 0.9,
+            });
+            console.log('CAMERA_RESULT', result);
+
+            if (!result.canceled && result.assets?.[0]?.uri) {
+                const localUri = result.assets[0].uri;
+                const uploaded = await processPhotoOnBackend(localUri);
+                addUriToGrid(uploaded);
+            }
+        } catch (e) {
+            console.warn('handleAddFromCamera error', e);
+            Alert.alert('Error', 'Could not capture photo.');
+        }
+    };
+    // ------------------------------------------------------
 
     return (
         <ParallaxScrollView
@@ -270,7 +277,7 @@ export default function TabNineScreen() {
                         </View>
                     ))}
 
-                    {/* Single "Add Photo" tile at end -> opens Gallery */}
+                    {/* ✅ Single "Add Photo" tile at end -> opens Gallery (unchanged) */}
                     {canAddMore && (
                         <Pressable
                             key="add-photo"
