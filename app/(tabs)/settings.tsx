@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { View, Pressable, Switch, ScrollView } from 'react-native';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -48,13 +49,13 @@ const settingsGroups: Group[] = [
 ];
 
 export default function TabFiveScreen() {
+    const router = useRouter();
     const [notifications, setNotifications] = useState(true);
     const [locationSharing, setLocationSharing] = useState(true);
     const [onlineStatus, setOnlineStatus] = useState(true);
 
-    // static demo values for progress bars
-    const maxDistancePct = 0.5; // 50% (e.g., 25 km)
-    const ageRangePct = 0.75;   // 75% (e.g., 22–35)
+    const maxDistancePct = 0.5; // demo
+    const ageRangePct = 0.75;   // demo
 
     return (
         <ScrollView
@@ -84,12 +85,20 @@ export default function TabFiveScreen() {
                             </ThemedText>
                         </View>
 
+                        {/* View Profile -> link */}
                         <Pressable
+                            onPress={() => router.push('/(tabs)/profile')}
+                            accessibilityRole="link"
+                            accessibilityLabel="View Profile"
                             className="mt-2 self-start flex-row items-center rounded-full px-2.5 py-2 border"
                             style={{ backgroundColor: TOKENS.cardBgAlt, borderColor: TOKENS.border }}
                         >
                             <IconSymbol name="person.text.rectangle" size={14} color={TOKENS.accent} />
-                            <ThemedText type="defaultSemiBold" className="ml-1.5 text-xs" style={{ color: TOKENS.accent }}>
+                            <ThemedText
+                                type="defaultSemiBold"
+                                className="ml-1.5 text-xs"
+                                style={{ color: TOKENS.accent }}
+                            >
                                 View Profile
                             </ThemedText>
                         </Pressable>
@@ -106,7 +115,6 @@ export default function TabFiveScreen() {
                     Quick Settings
                 </ThemedText>
 
-                {/* Notifications */}
                 <View className="py-3 flex-row items-center justify-between">
                     <View className="flex-row items-center" style={{ columnGap: 10 }}>
                         <IconSymbol name="bell" size={18} color={TOKENS.text} />
@@ -127,7 +135,6 @@ export default function TabFiveScreen() {
                     />
                 </View>
 
-                {/* Location Sharing */}
                 <View className="py-3 flex-row items-center justify-between">
                     <View className="flex-row items-center" style={{ columnGap: 10 }}>
                         <IconSymbol name="mappin.and.ellipse" size={18} color={TOKENS.text} />
@@ -148,7 +155,6 @@ export default function TabFiveScreen() {
                     />
                 </View>
 
-                {/* Online Status */}
                 <View className="py-3 flex-row items-center justify-between">
                     <View className="flex-row items-center" style={{ columnGap: 10 }}>
                         <IconSymbol name="person.crop.circle.badge.checkmark" size={18} color={TOKENS.text} />
@@ -216,7 +222,6 @@ export default function TabFiveScreen() {
                     Discovery Settings
                 </ThemedText>
 
-                {/* Max distance */}
                 <View className="mt-2">
                     <View className="flex-row items-center justify-between">
                         <ThemedText className="text-[13px]" style={{ color: TOKENS.textMuted }}>
@@ -234,7 +239,6 @@ export default function TabFiveScreen() {
                     </View>
                 </View>
 
-                {/* Age range */}
                 <View className="mt-3">
                     <View className="flex-row items-center justify-between">
                         <ThemedText className="text-[13px]" style={{ color: TOKENS.textMuted }}>
