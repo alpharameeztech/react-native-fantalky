@@ -1,10 +1,11 @@
+// app/(tabs)/discover.tsx (or your current path)
 import React, { useState } from "react";
 import { SafeAreaView, View, ScrollView, Pressable, Text } from "react-native";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { Sparkles, Filter, RotateCcw } from "lucide-react-native";
 
-import { SwipeCard } from "@/components/discover/SwipeCard"; // must be RN
-// If your SwipeCard renders images, ensure it uses expo-image with a placeholder.
+import { SwipeCard } from "@/components/discover/SwipeCard";
 
 type Profile = {
     id: string;
@@ -74,7 +75,7 @@ function IconButton({
         <Pressable
             onPress={onPress}
             disabled={disabled}
-            className={`w-11 h-11 rounded-full items-center justify-center bg-white/80 border border-white/20 ${
+            className={`w-11 h-11 rounded-full items-center justify-center bg-white border border-slate-200 shadow-sm ${
                 disabled ? "opacity-40" : "opacity-100"
             }`}
         >
@@ -95,7 +96,7 @@ function PrimaryButton({
     return (
         <Pressable
             onPress={onPress}
-            className={`px-5 py-3 rounded-xl bg-[#ff37ad] items-center ${className}`}
+            className={`px-5 py-3 rounded-xl items-center bg-[#ff37ad] ${className}`}
         >
             <Text className="text-white font-semibold">{title}</Text>
         </Pressable>
@@ -108,7 +109,6 @@ export default function DiscoverScreen() {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const handleSwipe = (direction: "left" | "right", profileId: string) => {
-        // console.log(`Swiped ${direction} on ${profileId}`);
         setTimeout(() => setCurrentIndex((prev) => prev + 1), 300);
     };
 
@@ -119,8 +119,13 @@ export default function DiscoverScreen() {
     const currentProfile = profiles[currentIndex];
 
     return (
-        <SafeAreaView className="flex-1 bg-black">
-            <ScrollView className="flex-1 bg-black" contentContainerStyle={{ paddingBottom: 180 }}>
+        <SafeAreaView className="flex-1 bg-white">
+            <StatusBar style="dark" />
+
+            <ScrollView
+                className="flex-1 bg-white"
+                contentContainerStyle={{ paddingBottom: 180 }}
+            >
                 {/* Header */}
                 <View className="px-6 pt-4 pb-4">
                     <View className="flex-row items-center justify-between mx-auto w-full max-w-md">
@@ -129,11 +134,8 @@ export default function DiscoverScreen() {
                         </IconButton>
 
                         <View className="items-center">
-                            <Text className="text-2xl font-bold text-transparent bg-clip-text">
-                                {/* apply color via class when using your gradient util; for now white */}
-                            </Text>
-                            <Text className="text-2xl font-bold text-white">Discover</Text>
-                            <Text className="text-sm text-neutral-400">
+                            <Text className="text-2xl font-bold text-slate-900">Discover</Text>
+                            <Text className="text-sm text-slate-500">
                                 {profiles.length - currentIndex} profiles nearby
                             </Text>
                         </View>
@@ -160,19 +162,19 @@ export default function DiscoverScreen() {
                             )}
 
                             {/* Active card on top */}
-                            <SwipeCard key={currentProfile.id} profile={currentProfile} onSwipe={handleSwipe} />
+                            <SwipeCard
+                                key={currentProfile.id}
+                                profile={currentProfile}
+                                onSwipe={handleSwipe}
+                            />
                         </View>
                     ) : (
                         <View className="items-center py-20">
-                            <Sparkles
-                                size={64}
-                                color="#ff37ad"
-                                className="mb-6"
-                            />
-                            <Text className="text-2xl font-bold text-white mb-2">
+                            <Sparkles size={64} color="#ff37ad" className="mb-6" />
+                            <Text className="text-2xl font-bold text-slate-900 mb-2">
                                 You're all caught up!
                             </Text>
-                            <Text className="text-neutral-400 mb-6">
+                            <Text className="text-slate-600 mb-6">
                                 Check back later for more amazing profiles
                             </Text>
                             <PrimaryButton
@@ -190,14 +192,17 @@ export default function DiscoverScreen() {
 
             {/* Premium Suggestion (overlay above the tab bar) */}
             <View className="absolute bottom-28 left-6 right-6 z-40">
-                <View className="mx-auto w-full max-w-md bg-white/90 rounded-2xl p-4 border border-white/20">
+                <View className="mx-auto w-full max-w-md bg-white rounded-2xl p-4 border border-slate-200 shadow">
                     <View className="flex-row items-center space-x-3">
-                        <View className="w-12 h-12 rounded-full items-center justify-center" style={{ backgroundColor: "#8b5cf6" }}>
+                        <View
+                            className="w-12 h-12 rounded-full items-center justify-center"
+                            style={{ backgroundColor: "#8b5cf6" }}
+                        >
                             <Sparkles size={24} color="#fff" />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-white font-semibold">Get More Matches</Text>
-                            <Text className="text-sm text-neutral-700">
+                            <Text className="text-slate-900 font-semibold">Get More Matches</Text>
+                            <Text className="text-sm text-slate-600">
                                 Upgrade to Premium for unlimited likes
                             </Text>
                         </View>
