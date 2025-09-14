@@ -1,28 +1,22 @@
 // app/(tabs)/six.tsx
-import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, Pressable, TextInput, FlatList, Dimensions } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Pressable, ScrollView } from 'react-native';
 import { Image } from 'expo-image';
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
-const { width } = Dimensions.get('window');
-
 const TOKENS = {
     pagePad: 24,
-    cardBg: '#14161c',
-    cardBgAlt: '#181a20',
-    border: '#2a2e36',
-    text: '#f2f4f8',
-    textMuted: '#c7cdd4',
+    cardBg: '#ffffff',
+    cardBgAlt: '#f9fafb',
+    border: '#e5e7eb',
+    text: '#0f172a',
+    textMuted: '#64748b',
     accent: '#ff37ad',
-    danger: '#ff3b30',
     badgeBg: '#e11d48',
-    badgeText: '#fff',
-    inputBg: '#1b1e25',
-    placeholder: '#9aa3ad',
+    badgeText: '#ffffff',
 };
 
 type Match = {
@@ -85,53 +79,82 @@ const MOCK_MATCHES: Match[] = [
 ];
 
 export default function TabSixScreen() {
-    const [searchQuery, setSearchQuery] = useState('');
     const matches = MOCK_MATCHES;
-
-    const filtered = useMemo(() => {
-        const q = searchQuery.trim().toLowerCase();
-        if (!q) return matches;
-        return matches.filter(
-            m =>
-                m.name.toLowerCase().includes(q) ||
-                m.location.toLowerCase().includes(q)
-        );
-    }, [searchQuery, matches]);
-
-    const unreadCount = useMemo(
-        () => filtered.filter(m => m.unreadCount > 0).length,
-        [filtered]
+    const unreadThreads = useMemo(
+        () => matches.filter(m => m.unreadCount > 0).length,
+        [matches]
     );
 
-    const renderItem = ({ item }: { item: Match }) => (
-        <Pressable style={styles.matchCard}>
+    const MatchCard = ({ item }: { item: Match }) => (
+        <Pressable
+            key={item.id}
+            className="w-full self-stretch rounded-2xl p-3 mt-3 flex-row items-center border"
+            style={{ backgroundColor: TOKENS.cardBg, borderColor: TOKENS.border }}
+        >
+            {/* Avatar */}
             <View style={{ position: 'relative' }}>
-                <Image source={{ uri: item.image }} style={styles.avatar} contentFit="cover" />
-                {item.isOnline && <View style={styles.onlineDot} />}
+                <Image
+                    source={{ uri: item.image }}
+                    contentFit="cover"
+                    style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: '#e5e7eb' }}
+                />
+                {item.isOnline && (
+                    <View
+                        className="absolute"
+                        style={{
+                            right: -2,
+                            top: -2,
+                            width: 14,
+                            height: 14,
+                            borderRadius: 7,
+                            backgroundColor: '#22c55e',
+                            borderWidth: 2,
+                            borderColor: TOKENS.cardBg,
+                        }}
+                    />
+                )}
             </View>
 
-            <View style={{ flex: 1, marginLeft: 10 }}>
-                <View style={styles.rowBetween}>
-                    <ThemedText type="defaultSemiBold" style={styles.nameText}>
+            {/* Message meta */}
+            <View className="flex-1 ml-3">
+                <View className="flex-row items-center justify-between">
+                    <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text, fontSize: 16 }}>
                         {item.name}, {item.age}
                     </ThemedText>
-
-                    <ThemedText style={styles.timeText}>{item.lastMessageTime}</ThemedText>
+                    <ThemedText style={{ color: TOKENS.textMuted, fontSize: 12 }}>
+                        {item.lastMessageTime}
+                    </ThemedText>
                 </View>
 
-                <View style={styles.locRow}>
+                <View className="flex-row items-center mt-0.5">
                     <IconSymbol name="mappin.and.ellipse" size={12} color={TOKENS.textMuted} />
-                    <ThemedText style={styles.locText}>{item.location}</ThemedText>
+                    <ThemedText style={{ color: TOKENS.textMuted, fontSize: 12, marginLeft: 4 }}>
+                        {item.location}
+                    </ThemedText>
                 </View>
 
-                <View style={styles.rowBetween}>
-                    <ThemedText numberOfLines={1} style={styles.lastMsg}>
+                <View className="flex-row items-center justify-between">
+                    <ThemedText
+                        numberOfLines={1}
+                        style={{ color: TOKENS.text, fontSize: 14, marginTop: 6, flex: 1, marginRight: 8 }}
+                    >
                         {item.lastMessage}
                     </ThemedText>
 
                     {item.unreadCount > 0 ? (
-                        <View style={styles.badge}>
-                            <ThemedText style={styles.badgeLabel}>{item.unreadCount}</ThemedText>
+                        <View
+                            className="items-center justify-center"
+                            style={{
+                                minWidth: 22,
+                                height: 22,
+                                borderRadius: 11,
+                                backgroundColor: TOKENS.badgeBg,
+                                paddingHorizontal: 6,
+                            }}
+                        >
+                            <ThemedText style={{ color: TOKENS.badgeText, fontSize: 12 }}>
+                                {item.unreadCount}
+                            </ThemedText>
                         </View>
                     ) : (
                         <IconSymbol name="chevron.right" size={16} color={TOKENS.textMuted} />
@@ -142,248 +165,53 @@ export default function TabSixScreen() {
     );
 
     return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-            headerImage={
-                <ThemedView style={styles.headerWrap}>
-                    <Image
-                        source={{ uri: 'https://images.unsplash.com/photo-1516383607781-913a19294fd1?q=80&w=1600&auto=format&fit=crop' }}
-                        style={styles.headerPhoto}
-                        contentFit="cover"
-                    />
+        <View className="flex-1 bg-white">
+            <ScrollView
+                contentContainerStyle={{ paddingHorizontal: TOKENS.pagePad, paddingTop: 12, paddingBottom: 140 }}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* Top stats */}
+                <View className="pb-1">
+                    <ThemedText style={{ color: TOKENS.textMuted, fontSize: 12 }}>
+                        {matches.length} messages • {unreadThreads} unread
+                    </ThemedText>
+                </View>
 
-                    <ThemedView style={styles.headerPill}>
-                        <IconSymbol name="bubble.left.and.bubble.right.fill" size={16} color="#fff" />
-                        <ThemedText type="defaultSemiBold" style={styles.headerPillText}>
-                            Your Matches
-                        </ThemedText>
-                    </ThemedView>
-
-                    {/* Search */}
-                    <ThemedView style={styles.searchWrap}>
-                        <IconSymbol name="magnifyingglass" size={16} color={TOKENS.textMuted} />
-                        <TextInput
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            placeholder="Search matches..."
-                            placeholderTextColor={TOKENS.placeholder}
-                            style={styles.searchInput}
-                        />
-                    </ThemedView>
-                </ThemedView>
-            }
-        >
-            {/* Stats */}
-            <View style={styles.statsWrap}>
-                <ThemedText style={styles.statsText}>
-                    {filtered.length} matches • {unreadCount} unread
-                </ThemedText>
-            </View>
-
-            {/* Matches list */}
-            <FlatList
-                data={filtered}
-                keyExtractor={item => item.id}
-                renderItem={renderItem}
-                contentContainerStyle={{ paddingHorizontal: TOKENS.pagePad, paddingBottom: 140 }}
-                ListEmptyComponent={
-                    <ThemedView style={styles.emptyWrap}>
-                        <View style={styles.emptyCircle}>
-                            <IconSymbol name="sparkles" size={28} color="#fff" />
-                        </View>
-                        <ThemedText type="defaultSemiBold" style={styles.emptyTitle}>
-                            {searchQuery ? 'No matches found' : 'No matches yet'}
-                        </ThemedText>
-                        <ThemedText style={styles.emptySub}>
-                            {searchQuery ? 'Try adjusting your search' : 'Start swiping to find your perfect match!'}
-                        </ThemedText>
-                        {!searchQuery && (
-                            <Pressable style={styles.discoverBtn}>
-                                <IconSymbol name="compass.fill" size={16} color="#fff" />
-                                <ThemedText type="defaultSemiBold" style={styles.discoverBtnText}>
-                                    Start Discovering
-                                </ThemedText>
-                            </Pressable>
-                        )}
-                    </ThemedView>
-                }
-            />
+                {/* Message list */}
+                <View className="w-full">
+                    {matches.map(m => (
+                        <MatchCard key={m.id} item={m} />
+                    ))}
+                </View>
+            </ScrollView>
 
             {/* Premium CTA (fixed) */}
-            <View style={styles.premiumWrap}>
-                <ThemedView style={styles.premiumCard}>
-                    <View style={styles.premiumIconCircle}>
+            <View style={{ position: 'absolute', left: TOKENS.pagePad, right: TOKENS.pagePad, bottom: 90 }}>
+                <ThemedView
+                    className="rounded-2xl flex-row items-center border"
+                    style={{ backgroundColor: TOKENS.cardBgAlt, padding: 12, gap: 12, borderColor: TOKENS.border }}
+                >
+                    <View
+                        className="items-center justify-center"
+                        style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: TOKENS.accent }}
+                    >
                         <IconSymbol name="sparkles" size={22} color="#fff" />
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <ThemedText type="defaultSemiBold" style={styles.premiumTitle}>
+                    <View className="flex-1">
+                        <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>
                             See Who Likes You
                         </ThemedText>
-                        <ThemedText style={styles.premiumSub}>
+                        <ThemedText style={{ color: TOKENS.textMuted, fontSize: 12 }}>
                             Get instant matches with Premium
                         </ThemedText>
                     </View>
-                    <Pressable style={styles.upgradeBtn}>
-                        <ThemedText type="defaultSemiBold" style={styles.upgradeBtnText}>
+                    <Pressable className="rounded-lg" style={{ backgroundColor: TOKENS.accent, paddingHorizontal: 12, paddingVertical: 8 }}>
+                        <ThemedText type="defaultSemiBold" className="text-white text-[13px]">
                             Upgrade
                         </ThemedText>
                     </Pressable>
                 </ThemedView>
             </View>
-        </ParallaxScrollView>
+        </View>
     );
 }
-
-const styles = StyleSheet.create({
-    // Header with image and search
-    headerWrap: {
-        height: 220,
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-        overflow: 'hidden',
-        justifyContent: 'flex-end',
-        paddingBottom: 12,
-    },
-    headerPhoto: { width: '100%', height: '100%', position: 'absolute', left: 0, top: 0 },
-    headerPill: {
-        alignSelf: 'flex-start',
-        marginLeft: TOKENS.pagePad,
-        backgroundColor: '#5b6cff',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    headerPillText: { color: '#fff', fontSize: 12 },
-    searchWrap: {
-        marginTop: 10,
-        marginHorizontal: TOKENS.pagePad,
-        backgroundColor: TOKENS.inputBg,
-        borderRadius: 14,
-        paddingHorizontal: 10,
-        paddingVertical: 10,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    searchInput: {
-        flex: 1,
-        color: TOKENS.text,
-        fontSize: 14,
-        paddingVertical: 2,
-    },
-
-    // Stats
-    statsWrap: { paddingHorizontal: TOKENS.pagePad, paddingTop: 12, paddingBottom: 6 },
-    statsText: { color: TOKENS.textMuted, fontSize: 12 },
-
-    // Match card
-    matchCard: {
-        backgroundColor: TOKENS.cardBg,
-        borderRadius: 16,
-        padding: 12,
-        marginTop: 10,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    avatar: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#22252b' },
-    onlineDot: {
-        position: 'absolute',
-        right: -2,
-        top: -2,
-        width: 14,
-        height: 14,
-        borderRadius: 7,
-        backgroundColor: '#22c55e',
-        borderWidth: 2,
-        borderColor: TOKENS.cardBg,
-    },
-    nameText: { color: TOKENS.text, fontSize: 15 },
-    timeText: { color: TOKENS.textMuted, fontSize: 12 },
-    locRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
-    locText: { color: TOKENS.textMuted, fontSize: 12, marginLeft: 4 },
-    lastMsg: { color: TOKENS.text, opacity: 0.9, fontSize: 13, marginTop: 6, flex: 1, marginRight: 8 },
-
-    badge: {
-        minWidth: 22,
-        height: 22,
-        borderRadius: 11,
-        backgroundColor: TOKENS.badgeBg,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 6,
-    },
-    badgeLabel: { color: TOKENS.badgeText, fontSize: 12 },
-
-    rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-
-    // Empty state
-    emptyWrap: {
-        marginTop: 28,
-        paddingHorizontal: TOKENS.pagePad,
-        alignItems: 'center',
-    },
-    emptyCircle: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        backgroundColor: TOKENS.accent,
-        opacity: 0.85,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 16,
-    },
-    emptyTitle: { color: TOKENS.text, fontSize: 18, marginBottom: 6 },
-    emptySub: { color: TOKENS.textMuted, textAlign: 'center', marginBottom: 14 },
-    discoverBtn: {
-        backgroundColor: TOKENS.accent,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        borderRadius: 12,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    discoverBtnText: { color: '#fff', fontSize: 14 },
-
-    // Premium CTA
-    premiumWrap: {
-        position: 'absolute',
-        left: TOKENS.pagePad,
-        right: TOKENS.pagePad,
-        bottom: 90,
-    },
-    premiumCard: {
-        backgroundColor: TOKENS.cardBgAlt,
-        borderRadius: 18,
-        padding: 12,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-    },
-    premiumIconCircle: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: TOKENS.accent,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    premiumTitle: { color: TOKENS.text },
-    premiumSub: { color: TOKENS.textMuted, fontSize: 12 },
-    upgradeBtn: {
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        backgroundColor: TOKENS.accent,
-        borderRadius: 10,
-    },
-    upgradeBtnText: { color: '#fff', fontSize: 13 },
-});
