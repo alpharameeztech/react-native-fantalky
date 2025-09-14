@@ -1,35 +1,18 @@
 // app/(tabs)/seven.tsx
 import React from 'react';
-import { StyleSheet, View, Pressable, Dimensions } from 'react-native';
-import { Image } from 'expo-image';
-
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { View, Pressable, ScrollView, Dimensions } from 'react-native';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 
 const { width } = Dimensions.get('window');
 
-const TOKENS = {
-    pagePad: 24,
-    cardBg: '#14161c',
-    cardBgAlt: '#181a20',
-    border: '#2a2e36',
-    text: '#f2f4f8',
-    textMuted: '#c7cdd4',
-    accent: '#ff37ad',
-    accentAlt: '#5b6cff',
-    success: '#22c55e',
-    ribbon: '#ff37ad',
-    chipBg: 'rgba(255,255,255,0.14)',
-};
-
 type Feature = { icon: string; title: string; description: string };
 const premiumFeatures: Feature[] = [
-    { icon: 'heart.fill',   title: 'Unlimited Likes',    description: 'Like as many profiles as you want' },
-    { icon: 'eye.fill',     title: 'See Who Likes You',  description: 'Get instant matches and save time' },
-    { icon: 'bolt.fill',    title: 'Boost Your Profile', description: 'Be seen by 10x more people' },
-    { icon: 'crown.fill',   title: 'Priority Support',    description: '24/7 premium customer service' },
+    { icon: 'heart.fill', title: 'Unlimited Likes', description: 'Like as many profiles as you want' },
+    { icon: 'eye.fill', title: 'See Who Likes You', description: 'Get instant matches and save time' },
+    { icon: 'bolt.fill', title: 'Boost Your Profile', description: 'Be seen by 10x more people' },
+    { icon: 'crown.fill', title: 'Priority Support', description: '24/7 premium customer service' },
 ];
 
 type Plan = {
@@ -46,13 +29,7 @@ const plans: Plan[] = [
         price: '$19.99',
         period: '/month',
         description: 'Perfect for active daters',
-        features: [
-            'Unlimited likes',
-            'See who likes you',
-            '5 Super Likes per day',
-            'Rewind feature',
-            'Priority support',
-        ],
+        features: ['Unlimited likes', 'See who likes you', '5 Super Likes per day', 'Rewind feature', 'Priority support'],
     },
     {
         name: 'Premium Plus',
@@ -87,53 +64,58 @@ const plans: Plan[] = [
 
 type Bundle = { amount: number; price: string; tag?: 'Best Value' | 'Popular' };
 const connectsBundles: Bundle[] = [
-    { amount: 20,  price: '$4.99' },
-    { amount: 50,  price: '$9.99', tag: 'Popular' },
+    { amount: 20, price: '$4.99' },
+    { amount: 50, price: '$9.99', tag: 'Popular' },
     { amount: 120, price: '$19.99', tag: 'Best Value' },
 ];
 
-export default function TabSevenScreen() {
-    const onChoosePlan = (name: string) => {
-        // UI-only: replace with your subscription flow later.
-        console.log('Choose plan:', name);
-    };
+// 2-col feature tiles (keep calc)
+const PAGE_PAD = 24;
+const CARD_PAD = 16;
+const COL_GAP = 10;
+const COLS = 2;
+const tileW = (width - PAGE_PAD * 2 - COL_GAP * (COLS - 1) - CARD_PAD * 2) / COLS;
 
-    const onBuyBundle = (bundle: Bundle) => {
-        // UI-only: replace with your purchase flow later.
-        console.log('Buy connects:', bundle);
-    };
+export default function TabSevenScreen() {
+    const onChoosePlan = (name: string) => console.log('Choose plan:', name);
+    const onBuyBundle = (bundle: Bundle) => console.log('Buy connects:', bundle);
 
     return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-            headerImage={
-                <ThemedView style={styles.headerWrap}>
-                    <Image
-                        source={{ uri: 'https://images.unsplash.com/photo-1520975930498-0f8d7a6a1533?q=80&w=1600&auto=format&fit=crop' }}
-                        contentFit="cover"
-                        style={styles.headerPhoto}
-                    />
-
-                    <View style={styles.headerCenter}>
-                        <View style={styles.headerIconCircle}>
-                            <IconSymbol name="crown.fill" size={28} color="#fff" />
-                        </View>
-                        <ThemedText type="title" style={styles.headerTitle}>Upgrade to Premium</ThemedText>
-                        <ThemedText style={styles.headerSub}>Get more matches and find love faster</ThemedText>
-                    </View>
-                </ThemedView>
-            }
+        <ScrollView
+            contentContainerStyle={{ paddingHorizontal: PAGE_PAD, paddingBottom: 24 }}
+            showsVerticalScrollIndicator={false}
         >
+            {/* Hero */}
+            <ThemedView className="rounded-2xl mt-3 border p-5 items-center bg-white dark:bg-[#14161c] border-slate-200 dark:border-white/10">
+                <View className="items-center justify-center rounded-full mb-2 w-16 h-16 bg-pink-600">
+                    <IconSymbol name="crown.fill" size={28} color="#fff" />
+                </View>
+                <ThemedText type="title" className="text-center text-slate-900 dark:text-white">
+                    Upgrade to Premium
+                </ThemedText>
+                <ThemedText className="text-center mt-1 text-slate-600 dark:text-slate-400">
+                    Get more matches and find love faster
+                </ThemedText>
+            </ThemedView>
+
             {/* Features Grid */}
-            <ThemedView style={styles.card}>
-                <View style={styles.featuresGrid}>
+            <ThemedView className="rounded-2xl mt-3 border p-4 bg-white dark:bg-[#14161c] border-slate-200 dark:border-white/10">
+                <View className="flex-row flex-wrap justify-between" style={{ rowGap: COL_GAP }}>
                     {premiumFeatures.map((f, i) => (
-                        <View key={i} style={styles.featureItem}>
-                            <View style={styles.featureIconCircle}>
+                        <View
+                            key={i}
+                            className="rounded-xl border items-center p-3 bg-slate-50 dark:bg-[#181a20] border-slate-200 dark:border-white/10"
+                            style={{ width: tileW }}
+                        >
+                            <View className="items-center justify-center rounded-full mb-2 w-12 h-12 bg-indigo-600">
                                 <IconSymbol name={f.icon} size={18} color="#fff" />
                             </View>
-                            <ThemedText type="defaultSemiBold" style={styles.featureTitle}>{f.title}</ThemedText>
-                            <ThemedText style={styles.featureDesc}>{f.description}</ThemedText>
+                            <ThemedText type="defaultSemiBold" className="text-center text-slate-900 dark:text-white">
+                                {f.title}
+                            </ThemedText>
+                            <ThemedText className="text-center text-xs mt-1 text-slate-600 dark:text-slate-400">
+                                {f.description}
+                            </ThemedText>
                         </View>
                     ))}
                 </View>
@@ -141,39 +123,57 @@ export default function TabSevenScreen() {
 
             {/* Pricing Plans */}
             {plans.map((plan, idx) => (
-                <ThemedView key={idx} style={[styles.planCard, plan.popular && styles.planCardPopular]}>
+                <ThemedView
+                    key={idx}
+                    className={`rounded-2xl mt-3 p-4 border bg-white dark:bg-[#14161c] ${
+                        plan.popular ? 'border-pink-500' : 'border-slate-200 dark:border-white/10'
+                    }`}
+                >
                     {plan.popular && (
-                        <View style={styles.ribbon}>
-                            <ThemedText type="defaultSemiBold" style={styles.ribbonText}>Most Popular</ThemedText>
+                        <View
+                            className="absolute rounded-full px-3 py-1 bg-pink-500"
+                            style={{ top: -12, left: '50%', transform: [{ translateX: -60 }] }}
+                        >
+                            <ThemedText className="text-white text-[12px] font-semibold">Most Popular</ThemedText>
                         </View>
                     )}
 
-                    <View style={{ alignItems: 'center', marginBottom: 10 }}>
-                        <ThemedText type="defaultSemiBold" style={styles.planName}>{plan.name}</ThemedText>
-                        <View style={styles.priceRow}>
-                            <ThemedText type="title" style={styles.priceText}>{plan.price}</ThemedText>
-                            <ThemedText style={styles.periodText}>{plan.period}</ThemedText>
+                    <View className="items-center mb-2.5">
+                        <ThemedText type="defaultSemiBold" className="text-lg text-slate-900 dark:text-white">
+                            {plan.name}
+                        </ThemedText>
+                        <View className="flex-row items-baseline mt-1">
+                            <ThemedText type="title" className="text-2xl font-extrabold text-slate-900 dark:text-white">
+                                {plan.price}
+                            </ThemedText>
+                            <ThemedText className="ml-1 text-slate-600 dark:text-slate-400">{plan.period}</ThemedText>
                         </View>
-                        <ThemedText style={styles.planDesc}>{plan.description}</ThemedText>
+                        <ThemedText className="mt-1 text-center text-slate-600 dark:text-slate-400">
+                            {plan.description}
+                        </ThemedText>
                     </View>
 
-                    <View style={{ gap: 8, marginBottom: 12 }}>
+                    <View style={{ rowGap: 8 }}>
                         {plan.features.map((ft, i) => (
-                            <View key={i} style={styles.planFeatureRow}>
-                                <View style={styles.checkCircle}>
+                            <View key={i} className="flex-row items-center" style={{ columnGap: 8 }}>
+                                <View className="items-center justify-center rounded-full w-5 h-5 bg-emerald-500">
                                     <IconSymbol name="checkmark" size={12} color="#fff" />
                                 </View>
-                                <ThemedText style={styles.planFeatureText}>{ft}</ThemedText>
+                                <ThemedText className="text-slate-700 dark:text-slate-200">{ft}</ThemedText>
                             </View>
                         ))}
                     </View>
 
                     <Pressable
                         onPress={() => onChoosePlan(plan.name)}
-                        style={[styles.ctaBtn, plan.popular ? styles.ctaBtnPrimary : styles.ctaBtnSecondary]}
+                        className={`mt-2 rounded-xl py-3 flex-row items-center justify-center ${
+                            plan.popular
+                                ? 'bg-pink-600'
+                                : 'bg-slate-100 dark:bg-[#181a20] border border-slate-200 dark:border-white/10'
+                        }`}
                     >
                         {plan.popular && <IconSymbol name="sparkles" size={16} color="#fff" />}
-                        <ThemedText type="defaultSemiBold" style={styles.ctaBtnText}>
+                        <ThemedText type="defaultSemiBold" className="ml-1.5 text-[15px] text-white dark:text-white">
                             Choose {plan.name}
                         </ThemedText>
                     </Pressable>
@@ -181,203 +181,53 @@ export default function TabSevenScreen() {
             ))}
 
             {/* Connects Bundles */}
-            <ThemedView style={styles.card}>
-                <View style={[styles.rowBetween, { marginBottom: 8 }]}>
-                    <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>Buy Connects</ThemedText>
-                    <View style={styles.infoChip}>
-                        <IconSymbol name="questionmark.circle" size={12} color={TOKENS.text} />
-                        <ThemedText style={styles.infoChipText}>Use connects to message first</ThemedText>
+            <ThemedView className="rounded-2xl mt-3 border p-4 bg-white dark:bg-[#14161c] border-slate-200 dark:border-white/10">
+                <View className="flex-row items-center justify-between mb-2">
+                    <ThemedText type="defaultSemiBold" className="text-slate-900 dark:text-white">
+                        Buy Connects
+                    </ThemedText>
+                    <View className="flex-row items-center rounded-full px-2.5 py-1.5 bg-slate-100 dark:bg-white/10">
+                        <IconSymbol name="questionmark.circle" size={12} color="#0f172a" />
+                        <ThemedText className="ml-1 text-[12px] text-slate-700 dark:text-slate-200">
+                            Use connects to message first
+                        </ThemedText>
                     </View>
                 </View>
 
-                <View style={styles.bundleRow}>
+                <View className="flex-row" style={{ columnGap: 10 }}>
                     {connectsBundles.map((b, i) => (
-                        <Pressable key={i} onPress={() => onBuyBundle(b)} style={[styles.bundleTile, b.tag && styles.bundleTileTag]}>
+                        <Pressable
+                            key={i}
+                            onPress={() => onBuyBundle(b)}
+                            className={`flex-1 rounded-xl items-center py-3 border relative bg-slate-50 dark:bg-[#181a20] ${
+                                b.tag ? 'border-pink-500' : 'border-slate-200 dark:border-white/10'
+                            }`}
+                        >
                             {b.tag && (
-                                <View style={styles.bundleTag}>
-                                    <ThemedText style={styles.bundleTagText}>{b.tag}</ThemedText>
+                                <View className="absolute rounded-full px-2.5 py-1 bg-pink-500" style={{ top: -10 }}>
+                                    <ThemedText className="text-white text-[11px] font-bold">{b.tag}</ThemedText>
                                 </View>
                             )}
-                            <ThemedText type="subtitle" style={styles.bundleAmount}>{b.amount}</ThemedText>
-                            <ThemedText style={styles.bundlePrice}>{b.price}</ThemedText>
+                            <ThemedText type="subtitle" className="text-slate-900 dark:text-white">
+                                {b.amount}
+                            </ThemedText>
+                            <ThemedText className="mt-1 text-slate-600 dark:text-slate-400">{b.price}</ThemedText>
                         </Pressable>
                     ))}
                 </View>
             </ThemedView>
 
             {/* Money Back Guarantee */}
-            <ThemedView style={[styles.card, { alignItems: 'center' }]}>
-                <View style={styles.guaranteeBox}>
-                    <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text, marginBottom: 6 }}>
+            <ThemedView className="rounded-2xl mt-3 border p-4 items-center bg-white dark:bg-[#14161c] border-slate-200 dark:border-white/10">
+                <View className="w-full rounded-xl border p-3 bg-slate-50 dark:bg-[#181a20] border-slate-200 dark:border-white/10">
+                    <ThemedText type="defaultSemiBold" className="mb-1.5 text-center text-slate-900 dark:text-white">
                         30-Day Money Back Guarantee
                     </ThemedText>
-                    <ThemedText style={{ color: TOKENS.textMuted, textAlign: 'center' }}>
+                    <ThemedText className="text-center text-slate-600 dark:text-slate-400">
                         Not satisfied? Get a full refund within 30 days, no questions asked.
                     </ThemedText>
                 </View>
             </ThemedView>
-        </ParallaxScrollView>
+        </ScrollView>
     );
 }
-
-const CARD_PAD = 16;
-const COL_GAP = 10;
-const COLS = 2;
-const tileW = (width - TOKENS.pagePad * 2 - COL_GAP * (COLS - 1) - CARD_PAD * 2) / COLS;
-
-const styles = StyleSheet.create({
-    // Header
-    headerWrap: {
-        height: 220,
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-        overflow: 'hidden',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    headerPhoto: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
-    headerCenter: { alignItems: 'center', paddingHorizontal: 16 },
-    headerIconCircle: {
-        width: 64, height: 64, borderRadius: 32,
-        backgroundColor: TOKENS.accent, alignItems: 'center', justifyContent: 'center', marginBottom: 10,
-    },
-    headerTitle: { color: '#fff', fontSize: 22, fontWeight: '800' },
-    headerSub: { color: 'rgba(255,255,255,0.9)', marginTop: 4 },
-
-    // Generic card
-    card: {
-        backgroundColor: TOKENS.cardBg,
-        borderRadius: 20,
-        padding: CARD_PAD,
-        marginTop: 12,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-    },
-
-    // Features
-    featuresGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: COL_GAP,
-        justifyContent: 'space-between',
-    },
-    featureItem: {
-        width: tileW,
-        backgroundColor: TOKENS.cardBgAlt,
-        borderRadius: 16,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-        padding: 12,
-        alignItems: 'center',
-    },
-    featureIconCircle: {
-        width: 48, height: 48, borderRadius: 24,
-        backgroundColor: TOKENS.accentAlt,
-        alignItems: 'center', justifyContent: 'center', marginBottom: 8,
-    },
-    featureTitle: { color: TOKENS.text, textAlign: 'center' },
-    featureDesc: { color: TOKENS.textMuted, textAlign: 'center', fontSize: 12, marginTop: 4 },
-
-    // Plan cards
-    planCard: {
-        backgroundColor: '#ffffff0F',
-        borderRadius: 20,
-        padding: CARD_PAD,
-        marginTop: 12,
-        borderWidth: 2,
-        borderColor: 'rgba(255,255,255,0.18)',
-    },
-    planCardPopular: {
-        borderColor: TOKENS.accent,
-        shadowColor: TOKENS.accent,
-        shadowOpacity: 0.35,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 4 },
-    },
-    ribbon: {
-        position: 'absolute',
-        top: -12,
-        left: '50%',
-        transform: [{ translateX: -60 }],
-        backgroundColor: TOKENS.ribbon,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 999,
-    },
-    ribbonText: { color: '#fff', fontSize: 12 },
-
-    planName: { color: TOKENS.text, fontSize: 18 },
-    priceRow: { flexDirection: 'row', alignItems: 'baseline', marginTop: 4 },
-    priceText: { color: TOKENS.text, fontSize: 26, fontWeight: '800' },
-    periodText: { color: TOKENS.textMuted, marginLeft: 4 },
-    planDesc: { color: TOKENS.textMuted, marginTop: 4 },
-
-    planFeatureRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    checkCircle: {
-        width: 20, height: 20, borderRadius: 10, backgroundColor: TOKENS.success,
-        alignItems: 'center', justifyContent: 'center',
-    },
-    planFeatureText: { color: TOKENS.text },
-
-    ctaBtn: {
-        marginTop: 8,
-        borderRadius: 14,
-        paddingVertical: 14,
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'row',
-        gap: 8,
-    },
-    ctaBtnPrimary: { backgroundColor: TOKENS.accent },
-    ctaBtnSecondary: {
-        backgroundColor: TOKENS.cardBgAlt,
-        borderWidth: 1, borderColor: TOKENS.border,
-    },
-    ctaBtnText: { color: '#fff', fontSize: 15 },
-
-    // Connects
-    rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    infoChip: {
-        flexDirection: 'row', alignItems: 'center', gap: 6,
-        paddingHorizontal: 10, paddingVertical: 6,
-        backgroundColor: TOKENS.chipBg, borderRadius: 999,
-    },
-    infoChipText: { color: TOKENS.text, fontSize: 12 },
-    bundleRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
-    bundleTile: {
-        flex: 1,
-        backgroundColor: TOKENS.cardBgAlt,
-        borderRadius: 16,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-        paddingVertical: 14,
-        alignItems: 'center',
-        position: 'relative',
-    },
-    bundleTileTag: {
-        borderWidth: 2,
-        borderColor: TOKENS.accent,
-    },
-    bundleTag: {
-        position: 'absolute',
-        top: -10,
-        alignSelf: 'center',
-        backgroundColor: TOKENS.accent,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 999,
-    },
-    bundleTagText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-    bundleAmount: { color: TOKENS.text },
-    bundlePrice: { color: TOKENS.textMuted, marginTop: 4 },
-
-    // Guarantee
-    guaranteeBox: {
-        width: '100%',
-        backgroundColor: TOKENS.cardBgAlt,
-        borderRadius: 16,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-        padding: 14,
-    },
-});
