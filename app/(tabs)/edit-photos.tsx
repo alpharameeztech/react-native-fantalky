@@ -55,28 +55,31 @@ export default function TabNineScreen() {
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
             headerImage={
-                <ThemedView style={styles.headerWrap}>
+                <ThemedView className="h-[200px] rounded-b-2xl overflow-hidden">
+                    {/* Header image kept intact; give explicit size to ensure visibility */}
                     <Image
                         source={{ uri: 'https://images.unsplash.com/photo-1520975930498-0f8d7a6a1533?q=80&w=1600&auto=format&fit=crop' }}
                         contentFit="cover"
-                        style={styles.headerPhoto}
+                        className="w-full h-full"
                     />
 
+                    {/* Header pill */}
                     <ThemedView
-                        style={styles.headerPill}
-                        className="absolute flex-row items-center rounded-full"
+                        className="absolute top-3 left-3 rounded-full flex-row items-center px-2.5 py-1.5"
+                        style={{ backgroundColor: '#5b6cff' }}
                     >
                         <IconSymbol name="camera.fill" size={16} color="#fff" />
-                        <ThemedText type="defaultSemiBold" style={styles.headerPillText}>
+                        <ThemedText type="defaultSemiBold" className="text-white text-xs ml-1.5">
                             Manage Photos
                         </ThemedText>
                     </ThemedView>
 
-                    <View style={styles.headerActions}>
-                        <Pressable style={styles.headerIconBtn}>
+                    {/* Header actions */}
+                    <View className="absolute top-3 right-3 flex-row space-x-2">
+                        <Pressable className="rounded-2xl px-2.5 py-2" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
                             <IconSymbol name="chevron.left" size={18} color="#fff" />
                         </Pressable>
-                        <Pressable style={styles.headerIconBtn}>
+                        <Pressable className="rounded-2xl px-2.5 py-2" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
                             <IconSymbol name="pencil" size={18} color="#fff" />
                         </Pressable>
                     </View>
@@ -107,25 +110,17 @@ export default function TabNineScreen() {
                 className="rounded-2xl mt-3 border p-3"
                 style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
             >
-                <View
-                    className="flex-row flex-wrap justify-between"
-                    // RN 'gap' can be inconsistent; use rowGap via style to match your GAP value.
-                    style={{ rowGap: GAP }}
-                >
+                <View className="flex-row flex-wrap justify-between" style={{ rowGap: GAP }}>
                     {photos.map((photo, index) => (
                         <View
                             key={photo.id}
                             className="rounded-xl overflow-hidden border"
-                            style={{
-                                width: TILE_W,
-                                height: TILE_H,
-                                backgroundColor: TOKENS.cardAlt,
-                                borderColor: TOKENS.border,
-                            }}
+                            style={{ width: TILE_W, height: TILE_H, backgroundColor: TOKENS.cardAlt, borderColor: TOKENS.border }}
                         >
                             <View className="flex-1">
                                 {photo.url ? (
                                     <>
+                                        {/* Tile image kept with absolute fill to ensure visibility */}
                                         <Image
                                             source={{ uri: photo.url }}
                                             style={StyleSheet.absoluteFillObject}
@@ -134,10 +129,7 @@ export default function TabNineScreen() {
                                         />
 
                                         {photo.isMain && (
-                                            <View
-                                                className="absolute top-2 left-2 rounded-full px-2 py-1"
-                                                style={{ backgroundColor: TOKENS.accent }}
-                                            >
+                                            <View className="absolute top-2 left-2 rounded-full px-2 py-1" style={{ backgroundColor: TOKENS.accent }}>
                                                 <ThemedText className="text-white text-[11px] font-bold">Main</ThemedText>
                                             </View>
                                         )}
@@ -187,20 +179,14 @@ export default function TabNineScreen() {
                 className="rounded-2xl p-4 mt-3 border"
                 style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
             >
-                <Pressable
-                    className="rounded-xl py-3.5 flex-row items-center justify-center mb-2.5"
-                    style={{ backgroundColor: TOKENS.accent }}
-                >
+                <Pressable className="rounded-xl py-3.5 flex-row items-center justify-center mb-2.5" style={{ backgroundColor: TOKENS.accent }}>
                     <IconSymbol name="camera.fill" size={16} color="#fff" />
                     <ThemedText type="defaultSemiBold" className="ml-2 text-[15px]" style={{ color: '#fff' }}>
                         Take New Photo
                     </ThemedText>
                 </Pressable>
 
-                <Pressable
-                    className="rounded-xl py-3.5 flex-row items-center justify-center border"
-                    style={{ backgroundColor: TOKENS.cardAlt, borderColor: TOKENS.border }}
-                >
+                <Pressable className="rounded-xl py-3.5 flex-row items-center justify-center border" style={{ backgroundColor: TOKENS.cardAlt, borderColor: TOKENS.border }}>
                     <IconSymbol name="plus" size={16} color={TOKENS.accent} />
                     <ThemedText type="defaultSemiBold" className="ml-2 text-[15px]" style={{ color: TOKENS.accent }}>
                         Choose from Gallery
@@ -209,10 +195,7 @@ export default function TabNineScreen() {
             </ThemedView>
 
             {/* Guidelines */}
-            <ThemedView
-                className="rounded-2xl p-4 mt-3 border"
-                style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
-            >
+            <ThemedView className="rounded-2xl p-4 mt-3 border" style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}>
                 <ThemedText type="defaultSemiBold" className="mb-2" style={{ color: TOKENS.text }}>
                     Photo Guidelines
                 </ThemedText>
@@ -221,9 +204,7 @@ export default function TabNineScreen() {
                     <View className="flex-row items-start gap-2.5">
                         <View className="w-2 h-2 rounded-full mt-1.5" style={{ backgroundColor: TOKENS.success }} />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>
-                                Do
-                            </ThemedText>
+                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>Do</ThemedText>
                             <ThemedText style={{ color: TOKENS.textMuted }}>Use recent, clear photos of yourself</ThemedText>
                         </View>
                     </View>
@@ -231,9 +212,7 @@ export default function TabNineScreen() {
                     <View className="flex-row items-start gap-2.5">
                         <View className="w-2 h-2 rounded-full mt-1.5" style={{ backgroundColor: TOKENS.danger }} />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>
-                                Don’t
-                            </ThemedText>
+                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>Don’t</ThemedText>
                             <ThemedText style={{ color: TOKENS.textMuted }}>Use group photos as your main image</ThemedText>
                         </View>
                     </View>
@@ -241,9 +220,7 @@ export default function TabNineScreen() {
                     <View className="flex-row items-start gap-2.5">
                         <View className="w-2 h-2 rounded-full mt-1.5" style={{ backgroundColor: TOKENS.success }} />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>
-                                Do
-                            </ThemedText>
+                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>Do</ThemedText>
                             <ThemedText style={{ color: TOKENS.textMuted }}>Show your personality and interests</ThemedText>
                         </View>
                     </View>
@@ -251,22 +228,15 @@ export default function TabNineScreen() {
                     <View className="flex-row items-start gap-2.5">
                         <View className="w-2 h-2 rounded-full mt-1.5" style={{ backgroundColor: TOKENS.danger }} />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>
-                                Don’t
-                            </ThemedText>
-                            <ThemedText style={{ color: TOKENS.textMuted }}>
-                                Use heavily filtered or misleading photos
-                            </ThemedText>
+                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>Don’t</ThemedText>
+                            <ThemedText style={{ color: TOKENS.textMuted }}>Use heavily filtered or misleading photos</ThemedText>
                         </View>
                     </View>
                 </View>
             </ThemedView>
 
             {/* Footer summary */}
-            <ThemedView
-                className="rounded-2xl p-4 mt-3 border items-center"
-                style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
-            >
+            <ThemedView className="rounded-2xl p-4 mt-3 border items-center" style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}>
                 <ThemedText style={{ color: TOKENS.textMuted }}>
                     {filled.length}/6 photos added · Pick your best as{' '}
                     <ThemedText style={{ color: TOKENS.text }}>Main</ThemedText>
@@ -275,33 +245,3 @@ export default function TabNineScreen() {
         </ParallaxScrollView>
     );
 }
-
-const styles = StyleSheet.create({
-    headerWrap: {
-        height: 200,
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-        overflow: 'hidden',
-    },
-    headerPhoto: { width: '100%', height: '100%' },
-    headerPill: {
-        position: 'absolute',
-        top: 12,
-        left: 12,
-        backgroundColor: '#5b6cff',
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 16,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-    },
-    headerPillText: { color: '#fff', fontSize: 12 },
-    headerActions: { position: 'absolute', top: 12, right: 12, flexDirection: 'row', gap: 8 },
-    headerIconBtn: {
-        backgroundColor: 'rgba(0,0,0,0.55)',
-        paddingHorizontal: 10,
-        paddingVertical: 8,
-        borderRadius: 16,
-    },
-});
