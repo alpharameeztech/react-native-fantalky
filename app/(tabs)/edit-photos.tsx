@@ -1,11 +1,10 @@
 // app/(tabs)/nine.tsx
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, Pressable, Dimensions, Alert } from 'react-native';
+import { StyleSheet, View, Pressable, Dimensions, Alert, ScrollView } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Device from 'expo-device';
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -61,7 +60,7 @@ export default function TabNineScreen() {
 
         setPhotos(prev => {
             const next = prev.map(p => (p.id === photo.id ? { ...p, url: '', isMain: false } : p));
-            // Ensure we keep one "main" if any photos remain
+            // keep a main photo if any remain
             if (!next.some(p => p.isMain) && next.some(p => p.url)) {
                 const first = next.find(p => p.url);
                 if (first) first.isMain = true;
@@ -99,13 +98,12 @@ export default function TabNineScreen() {
         });
     };
 
-    // Gallery picker (unchanged behavior for Add Photo tile)
     const handlePickFromGallery = async () => {
         try {
             if (!canAddMore) return;
 
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ['images'], // ✅ new API uses string literals
+                mediaTypes: ['images'], // ✅ new API
                 allowsEditing: true,
                 aspect: [3, 4],
                 quality: 0.9,
@@ -124,7 +122,6 @@ export default function TabNineScreen() {
         }
     };
 
-    // Take a picture then upload then show it
     const handleAddFromCamera = async () => {
         try {
             if (!canAddMore) return;
@@ -142,7 +139,7 @@ export default function TabNineScreen() {
             }
 
             const result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ['images'], // ✅ string literal
+                mediaTypes: ['images'],
                 allowsEditing: true,
                 aspect: [3, 4],
                 quality: 0.9,
@@ -162,39 +159,9 @@ export default function TabNineScreen() {
     // ------------------------------------------------------
 
     return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-            headerImage={
-                <ThemedView className="h-[200px] rounded-b-2xl overflow-hidden">
-                    {/* header image */}
-                    <Image
-                        source={{ uri: 'https://images.unsplash.com/photo-1520975930498-0f8d7a6a1533?q=80&w=1600&auto=format&fit=crop' }}
-                        contentFit="cover"
-                        className="w-full h-full"
-                    />
-
-                    {/* header pill */}
-                    <ThemedView
-                        className="absolute top-3 left-3 rounded-full flex-row items-center px-2.5 py-1.5"
-                        style={{ backgroundColor: '#5b6cff' }}
-                    >
-                        <IconSymbol name="camera.fill" size={16} color="#fff" />
-                        <ThemedText type="defaultSemiBold" className="text-white text-xs ml-1.5">
-                            Manage Photos
-                        </ThemedText>
-                    </ThemedView>
-
-                    {/* header actions */}
-                    <View className="absolute top-3 right-3 flex-row space-x-2">
-                        <Pressable className="rounded-2xl px-2.5 py-2" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
-                            <IconSymbol name="chevron.left" size={18} color="#fff" />
-                        </Pressable>
-                        <Pressable className="rounded-2xl px-2.5 py-2" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
-                            <IconSymbol name="pencil" size={18} color="#fff" />
-                        </Pressable>
-                    </View>
-                </ThemedView>
-            }
+        <ScrollView
+            contentContainerStyle={{ paddingHorizontal: PAGE_PAD, paddingBottom: 24 }}
+            showsVerticalScrollIndicator={false}
         >
             {/* Tips */}
             <ThemedView
@@ -277,7 +244,7 @@ export default function TabNineScreen() {
                         </View>
                     ))}
 
-                    {/* ✅ Single "Add Photo" tile at end -> opens Gallery (unchanged) */}
+                    {/* Single "Add Photo" tile at end -> opens Gallery */}
                     {canAddMore && (
                         <Pressable
                             key="add-photo"
@@ -374,6 +341,8 @@ export default function TabNineScreen() {
                     <ThemedText style={{ color: TOKENS.text }}>Main</ThemedText>
                 </ThemedText>
             </ThemedView>
-        </ParallaxScrollView>
+        </ScrollView>
     );
 }
+
+const styles = StyleSheet.create({});
