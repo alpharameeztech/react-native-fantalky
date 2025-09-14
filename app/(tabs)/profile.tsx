@@ -5,7 +5,8 @@ import {
     StyleSheet,
     LayoutChangeEvent,
     TextInput,
-    useColorScheme, TouchableOpacity,
+    useColorScheme,
+    TouchableOpacity,
 } from "react-native";
 import { Image } from "expo-image";
 
@@ -14,9 +15,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useRouter } from "expo-router";
-const BLURHASH = "L6Pj0^i_.AyE_3t7t7R**0o#DgR4";
 
-const router = useRouter();
+const BLURHASH = "L6Pj0^i_.AyE_3t7t7R**0o#DgR4";
 
 // Static catalog of interests (10)
 const ALL_INTERESTS = [
@@ -59,10 +59,22 @@ const MAX_INTERESTS = 5;
 const HEADER_FALLBACK =
     "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1600&q=80";
 
+// derive a readable id/name from the URL for logging
+const getImageIdFromUri = (uri: string, index: number) => {
+    try {
+        const path = uri.split("?")[0];
+        const name = path.substring(path.lastIndexOf("/") + 1);
+        return name || `image-${index + 1}`;
+    } catch {
+        return `image-${index + 1}`;
+    }
+};
+
 export default function TabFourScreen() {
     const [gridW, setGridW] = useState(0);
     const [isEditing, setIsEditing] = useState(false);
     const colorScheme = useColorScheme();
+    const router = useRouter();
 
     // Keep last saved values for Close
     const savedFormRef = useRef({
@@ -95,18 +107,20 @@ export default function TabFourScreen() {
         setIsEditing(false);
     };
 
-    // Derive selected interests from CSV
+    // Log the id/name when an image's × is tapped (do NOT remove)
+    const handleLogImageDelete = (uri: string, index: number) => {
+        const id = getImageIdFromUri(uri, index);
+        console.log("DELETE_IMAGE:", id);
+    };
+
+    // Interests helpers
     const selected: string[] =
         form.interestsCsv
             ?.split(",")
             .map((s) => s.trim())
             .filter(Boolean) ?? [];
-
-    // Ensure we render any preselected tags even if not in the base catalog (just in case)
     const catalog = Array.from(new Set([...ALL_INTERESTS, ...selected]));
-
     const isSelected = (tag: string) => selected.includes(tag);
-
     const toggleInterest = (tag: string) => {
         if (!isEditing) return;
         if (isSelected(tag)) {
@@ -139,21 +153,17 @@ export default function TabFourScreen() {
                         transition={0}
                         style={StyleSheet.absoluteFillObject}
                     />
-
-                    {/* Theme-aware overlay: subtle in light, stronger in dark */}
+                    {/* Theme-aware overlay */}
                     <View
                         pointerEvents="none"
                         style={[
                             StyleSheet.absoluteFill,
                             {
                                 backgroundColor:
-                                    colorScheme === "dark"
-                                        ? "rgba(0,0,0,0.35)"
-                                        : "rgba(0,0,0,0.10)",
+                                    colorScheme === "dark" ? "rgba(0,0,0,0.35)" : "rgba(0,0,0,0.10)",
                             },
                         ]}
                     />
-
                     {/* "My Profile" pill */}
                     <ThemedView className="absolute top-3 left-3 bg-indigo-600 px-3 py-1.5 rounded-full flex-row items-center gap-1.5">
                         <IconSymbol name="person.crop.circle.fill" size={16} color="#fff" />
@@ -161,7 +171,6 @@ export default function TabFourScreen() {
                             My Profile
                         </ThemedText>
                     </ThemedView>
-
                     {/* Top-right actions */}
                     <View className="absolute top-3 right-3 flex-row gap-2">
                         <Pressable className="bg-black/40 px-3 py-2 rounded-xl">
@@ -194,8 +203,22 @@ export default function TabFourScreen() {
                                 transition={0}
                                 style={StyleSheet.absoluteFillObject}
                             />
+                            {/* Online dot on first tile (unchanged) */}
                             {i === 0 && (
                                 <View className="absolute top-1.5 left-1.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
+                            )}
+                            {/* Show × only while editing; log image id/name on press */}
+                            {isEditing && (
+                                <Pressable
+                                    onPress={() => handleLogImageDelete(uri, i)}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`Delete ${getImageIdFromUri(uri, i)}`}
+                                    hitSlop={10}
+                                    className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full items-center justify-center bg-black/55"
+                                    style={{ borderWidth: 1, borderColor: "rgba(255,255,255,0.5)" }}
+                                >
+                                    <IconSymbol name="xmark" size={14} color="#ffffff" />
+                                </Pressable>
                             )}
                         </View>
                     ))}
@@ -278,7 +301,6 @@ export default function TabFourScreen() {
                         <ThemedText className="text-slate-700 dark:text-slate-300 mt-3 leading-5">
                             {form.bio}
                         </ThemedText>
-
                         <ThemedText
                             type="defaultSemiBold"
                             className="text-slate-900 dark:text-slate-100 mt-3"
@@ -312,23 +334,17 @@ export default function TabFourScreen() {
                     Interests
                 </ThemedText>
 
-                {/* Helper while editing */}
                 {isEditing && (
                     <ThemedText className="text-xs text-slate-500 dark:text-slate-400 mb-2">
                         Pick up to {MAX_INTERESTS} interests ({selected.length}/{MAX_INTERESTS})
                     </ThemedText>
                 )}
 
-                {/* Chips:
-            - NOT editing: only render selected
-            - Editing: render whole catalog (selected + unselected)
-        */}
+                {/* Chips */}
                 <View className="flex-row flex-wrap" style={{ gap: 8 }}>
                     {(isEditing ? catalog : selected).map((tag) => {
                         const selectedNow = isSelected(tag);
-
                         if (selectedNow) {
-                            // Selected chip: blue + white text; tiny × only in edit mode
                             return (
                                 <Pressable
                                     key={tag}
@@ -341,13 +357,9 @@ export default function TabFourScreen() {
                                     className="relative px-3 py-1.5 rounded-full border bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500"
                                     style={{ paddingRight: isEditing ? 26 : 12 }}
                                 >
-                                    <ThemedText
-                                        className="text-white text-xs"
-                                        style={{ color: "#ffffff" }}
-                                    >
+                                    <ThemedText className="text-white text-xs" style={{ color: "#ffffff" }}>
                                         {tag}
                                     </ThemedText>
-
                                     {isEditing && (
                                         <View
                                             pointerEvents="none"
@@ -360,8 +372,6 @@ export default function TabFourScreen() {
                                 </Pressable>
                             );
                         }
-
-                        // Unselected chip (only appears when editing)
                         return (
                             <Pressable
                                 key={tag}
@@ -381,8 +391,6 @@ export default function TabFourScreen() {
                             </Pressable>
                         );
                     })}
-
-                    {/* If not editing and no selections, show a subtle hint */}
                     {!isEditing && selected.length === 0 && (
                         <ThemedText className="text-slate-500 dark:text-slate-400 text-xs">
                             No interests selected.
@@ -390,7 +398,7 @@ export default function TabFourScreen() {
                     )}
                 </View>
 
-                {/* Single Save/Close row below interests when editing */}
+                {/* Save/Close when editing */}
                 {isEditing && (
                     <View className="flex-row gap-2 mt-4">
                         <Pressable
@@ -467,7 +475,6 @@ export default function TabFourScreen() {
                         Manage Photos
                     </ThemedText>
                 </TouchableOpacity>
-
 
                 <Pressable className="mt-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/15 rounded-xl py-3 flex-row items-center justify-center gap-2">
                     <IconSymbol name="gearshape.fill" size={16} color="#fb4593" />
