@@ -27,6 +27,17 @@ const TOKENS = {
 
 type Photo = { id: string; url: string; isMain: boolean };
 
+// derive a readable id/name from the URL for logging
+const getImageIdFromUri = (uri: string, index: number) => {
+    try {
+        const path = uri.split('?')[0];
+        const name = path.substring(path.lastIndexOf('/') + 1);
+        return name || `image-${index + 1}`;
+    } catch {
+        return `image-${index + 1}`;
+    }
+};
+
 export default function TabNineScreen() {
     const [photos, setPhotos] = useState<Photo[]>([
         { id: '1', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=1200&fit=crop', isMain: true },
@@ -40,9 +51,12 @@ export default function TabNineScreen() {
         setPhotos(prev => prev.map(p => ({ ...p, isMain: p.id === photoId && p.url !== '' })));
     };
 
-    const handleRemovePhoto = (photoId: string) => {
+    const handleDeletePhoto = (photo: Photo, index: number) => {
+        const readableId = getImageIdFromUri(photo.url, index);
+        console.log('DELETE_IMAGE:', { id: readableId, url: photo.url, index });
         setPhotos(prev => {
-            const next = prev.map(p => (p.id === photoId ? { ...p, url: '', isMain: false } : p));
+            const next = prev.map(p => (p.id === photo.id ? { ...p, url: '', isMain: false } : p));
+            // keep a main photo if any remain
             if (!next.some(p => p.isMain) && next.some(p => p.url)) {
                 const first = next.find(p => p.url);
                 if (first) first.isMain = true;
@@ -56,14 +70,14 @@ export default function TabNineScreen() {
             headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
             headerImage={
                 <ThemedView className="h-[200px] rounded-b-2xl overflow-hidden">
-                    {/* Header image kept intact; give explicit size to ensure visibility */}
+                    {/* header image (unchanged) */}
                     <Image
                         source={{ uri: 'https://images.unsplash.com/photo-1520975930498-0f8d7a6a1533?q=80&w=1600&auto=format&fit=crop' }}
                         contentFit="cover"
                         className="w-full h-full"
                     />
 
-                    {/* Header pill */}
+                    {/* header pill */}
                     <ThemedView
                         className="absolute top-3 left-3 rounded-full flex-row items-center px-2.5 py-1.5"
                         style={{ backgroundColor: '#5b6cff' }}
@@ -74,7 +88,7 @@ export default function TabNineScreen() {
                         </ThemedText>
                     </ThemedView>
 
-                    {/* Header actions */}
+                    {/* header actions */}
                     <View className="absolute top-3 right-3 flex-row space-x-2">
                         <Pressable className="rounded-2xl px-2.5 py-2" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
                             <IconSymbol name="chevron.left" size={18} color="#fff" />
@@ -120,7 +134,7 @@ export default function TabNineScreen() {
                             <View className="flex-1">
                                 {photo.url ? (
                                     <>
-                                        {/* Tile image kept with absolute fill to ensure visibility */}
+                                        {/* tile image (unchanged) */}
                                         <Image
                                             source={{ uri: photo.url }}
                                             style={StyleSheet.absoluteFillObject}
@@ -145,7 +159,7 @@ export default function TabNineScreen() {
                                                 </Pressable>
                                             )}
                                             <Pressable
-                                                onPress={() => handleRemovePhoto(photo.id)}
+                                                onPress={() => handleDeletePhoto(photo, index)}
                                                 className="items-center justify-center rounded-full"
                                                 style={{ width: 30, height: 30, backgroundColor: '#ffffffE6' }}
                                             >
