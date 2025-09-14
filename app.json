@@ -33,6 +33,13 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow YourApp to access your photos so you can upload and manage profile pictures.",
+          "cameraPermission": "Allow YourApp to use your camera to take a new profile photo."
+        }
       ]
     ],
     "experiments": {

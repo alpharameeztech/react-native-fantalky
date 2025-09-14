@@ -1,7 +1,8 @@
 // app/(tabs)/nine.tsx
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, Pressable, Dimensions } from 'react-native';
+import { StyleSheet, View, Pressable, Dimensions, Alert } from 'react-native';
 import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -56,8 +57,10 @@ export default function TabNineScreen() {
     const handleDeletePhoto = (photo: Photo, index: number) => {
         const readableId = getImageIdFromUri(photo.url, index);
         console.log('DELETE_IMAGE:', { id: readableId, url: photo.url, index });
+
         setPhotos(prev => {
             const next = prev.map(p => (p.id === photo.id ? { ...p, url: '', isMain: false } : p));
+            // Ensure we keep one "main" if any photos remain
             if (!next.some(p => p.isMain) && next.some(p => p.url)) {
                 const first = next.find(p => p.url);
                 if (first) first.isMain = true;
@@ -66,17 +69,104 @@ export default function TabNineScreen() {
         });
     };
 
+    // ---- Add / upload flow ----
+    // Stub "backend" upload — logs and returns the provided URI.
+    const processPhotoOnBackend = async (localUri: string) => {
+        console.log('UPLOAD_TO_BACKEND_START', { localUri });
+        // TODO: replace with your real API call; return remote URL from server
+        console.log('UPLOAD_TO_BACKEND_SUCCESS', { remoteUrl: localUri });
+        return localUri;
+    };
+
+    // Insert a URI into the first empty slot if present; otherwise append.
+    const addUriToGrid = (uri: string) => {
+        setPhotos(prev => {
+            const currentCount = prev.filter(p => p.url).length;
+            if (currentCount >= MAX_PHOTOS) return prev;
+
+            const hasMain = prev.some(p => p.isMain && p.url);
+            const firstBlankIdx = prev.findIndex(p => !p.url);
+
+            if (firstBlankIdx !== -1) {
+                const next = [...prev];
+                next[firstBlankIdx] = { ...next[firstBlankIdx], url: uri, isMain: !hasMain };
+                console.log('ADD_TO_GRID_FILL_SLOT', next[firstBlankIdx]);
+                return next;
+            }
+
+            const newPhoto: Photo = { id: String(Date.now()), url: uri, isMain: !hasMain };
+            console.log('ADD_TO_GRID_APPEND', newPhoto);
+            return [...prev, newPhoto];
+        });
+    };
+
+    const handleAddFromCamera = async () => {
+        try {
+            if (!canAddMore) return;
+
+            const cam = await ImagePicker.requestCameraPermissionsAsync();
+            if (!cam.granted) {
+                Alert.alert('Permission needed', 'Camera permission is required to take a photo.');
+                return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                aspect: [3, 4],
+                quality: 0.9,
+            });
+            console.log('CAMERA_RESULT', result);
+
+            if (!result.canceled && result.assets?.[0]?.uri) {
+                const localUri = result.assets[0].uri;
+                const uploaded = await processPhotoOnBackend(localUri);
+                addUriToGrid(uploaded);
+            }
+        } catch (e) {
+            console.warn('handleAddFromCamera error', e);
+            Alert.alert('Error', 'Could not capture photo.');
+        }
+    };
+
+    const handlePickFromGallery = async () => {
+        try {
+            if (!canAddMore) return;
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],      // ✅ new API uses string literals
+                allowsEditing: true,
+                aspect: [3, 4],
+                quality: 0.9,
+                selectionLimit: 1,
+            });
+            console.log('GALLERY_RESULT', result);
+
+            if (!result.canceled && result.assets?.[0]?.uri) {
+                const localUri = result.assets[0].uri;
+                const uploaded = await processPhotoOnBackend(localUri);
+                addUriToGrid(uploaded);
+            }
+        } catch (e) {
+            console.warn('handlePickFromGallery error', e);
+            Alert.alert('Error', 'Could not pick a photo.');
+        }
+    };
+    // ---------------------------
+
     return (
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
             headerImage={
                 <ThemedView className="h-[200px] rounded-b-2xl overflow-hidden">
+                    {/* header image */}
                     <Image
                         source={{ uri: 'https://images.unsplash.com/photo-1520975930498-0f8d7a6a1533?q=80&w=1600&auto=format&fit=crop' }}
                         contentFit="cover"
                         className="w-full h-full"
                     />
 
+                    {/* header pill */}
                     <ThemedView
                         className="absolute top-3 left-3 rounded-full flex-row items-center px-2.5 py-1.5"
                         style={{ backgroundColor: '#5b6cff' }}
@@ -87,6 +177,7 @@ export default function TabNineScreen() {
                         </ThemedText>
                     </ThemedView>
 
+                    {/* header actions */}
                     <View className="absolute top-3 right-3 flex-row space-x-2">
                         <Pressable className="rounded-2xl px-2.5 py-2" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}>
                             <IconSymbol name="chevron.left" size={18} color="#fff" />
@@ -123,7 +214,7 @@ export default function TabNineScreen() {
                 style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
             >
                 <View className="flex-row flex-wrap justify-between" style={{ rowGap: GAP }}>
-                    {/* Render only filled photos */}
+                    {/* Only filled photos */}
                     {filled.map((photo, index) => (
                         <View
                             key={photo.id}
@@ -132,7 +223,7 @@ export default function TabNineScreen() {
                         >
                             <View className="flex-1">
                                 <>
-                                    {/* tile image (unchanged) */}
+                                    {/* tile image */}
                                     <Image
                                         source={{ uri: photo.url }}
                                         style={StyleSheet.absoluteFillObject}
@@ -140,12 +231,14 @@ export default function TabNineScreen() {
                                         transition={150}
                                     />
 
+                                    {/* Main badge */}
                                     {photo.isMain && (
                                         <View className="absolute top-2 left-2 rounded-full px-2 py-1" style={{ backgroundColor: TOKENS.accent }}>
                                             <ThemedText className="text-white text-[11px] font-bold">Main</ThemedText>
                                         </View>
                                     )}
 
+                                    {/* tile actions */}
                                     <View className="absolute top-2 right-2 flex-row" style={{ columnGap: 6 }}>
                                         {!photo.isMain && (
                                             <Pressable
@@ -165,6 +258,7 @@ export default function TabNineScreen() {
                                         </Pressable>
                                     </View>
 
+                                    {/* index badge */}
                                     <View
                                         className="absolute left-2 bottom-2 w-6 h-6 rounded-full items-center justify-center"
                                         style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
@@ -176,10 +270,11 @@ export default function TabNineScreen() {
                         </View>
                     ))}
 
-                    {/* Single "Add Photo" tile at the END */}
+                    {/* Single "Add Photo" tile at end -> opens Gallery */}
                     {canAddMore && (
-                        <View
+                        <Pressable
                             key="add-photo"
+                            onPress={handlePickFromGallery}
                             className="rounded-xl overflow-hidden border items-center justify-center"
                             style={{ width: TILE_W, height: TILE_H, backgroundColor: TOKENS.cardAlt, borderColor: TOKENS.border }}
                         >
@@ -189,7 +284,7 @@ export default function TabNineScreen() {
                                     Add Photo
                                 </ThemedText>
                             </View>
-                        </View>
+                        </Pressable>
                     )}
                 </View>
             </ThemedView>
@@ -199,14 +294,22 @@ export default function TabNineScreen() {
                 className="rounded-2xl p-4 mt-3 border"
                 style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
             >
-                <Pressable className="rounded-xl py-3.5 flex-row items-center justify-center mb-2.5" style={{ backgroundColor: TOKENS.accent }}>
+                <Pressable
+                    onPress={handleAddFromCamera}
+                    className="rounded-xl py-3.5 flex-row items-center justify-center mb-2.5"
+                    style={{ backgroundColor: TOKENS.accent }}
+                >
                     <IconSymbol name="camera.fill" size={16} color="#fff" />
                     <ThemedText type="defaultSemiBold" className="ml-2 text-[15px]" style={{ color: '#fff' }}>
                         Take New Photo
                     </ThemedText>
                 </Pressable>
 
-                <Pressable className="rounded-xl py-3.5 flex-row items-center justify-center border" style={{ backgroundColor: TOKENS.cardAlt, borderColor: TOKENS.border }}>
+                <Pressable
+                    onPress={handlePickFromGallery}
+                    className="rounded-xl py-3.5 flex-row items-center justify-center border"
+                    style={{ backgroundColor: TOKENS.cardAlt, borderColor: TOKENS.border }}
+                >
                     <IconSymbol name="plus" size={16} color={TOKENS.accent} />
                     <ThemedText type="defaultSemiBold" className="ml-2 text-[15px]" style={{ color: TOKENS.accent }}>
                         Choose from Gallery
