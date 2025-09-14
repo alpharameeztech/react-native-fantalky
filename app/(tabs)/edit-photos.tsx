@@ -32,9 +32,6 @@ export default function TabNineScreen() {
         { id: '1', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=1200&fit=crop', isMain: true },
         { id: '2', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&h=1200&fit=crop', isMain: false },
         { id: '3', url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&h=1200&fit=crop', isMain: false },
-        { id: '4', url: '', isMain: false },
-        { id: '5', url: '', isMain: false },
-        { id: '6', url: '', isMain: false },
     ]);
 
     const filled = useMemo(() => photos.filter(p => !!p.url), [photos]);
@@ -64,7 +61,11 @@ export default function TabNineScreen() {
                         contentFit="cover"
                         style={styles.headerPhoto}
                     />
-                    <ThemedView style={styles.headerPill}>
+
+                    <ThemedView
+                        style={styles.headerPill}
+                        className="absolute flex-row items-center rounded-full"
+                    >
                         <IconSymbol name="camera.fill" size={16} color="#fff" />
                         <ThemedText type="defaultSemiBold" style={styles.headerPillText}>
                             Manage Photos
@@ -83,25 +84,46 @@ export default function TabNineScreen() {
             }
         >
             {/* Tips */}
-            <ThemedView style={styles.card}>
-                <View style={styles.cardTitleRow}>
+            <ThemedView
+                className="rounded-2xl p-4 mt-3 border"
+                style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
+            >
+                <View className="flex-row items-center gap-2 mb-2">
                     <IconSymbol name="star.fill" size={16} color="#f59e0b" />
-                    <ThemedText type="defaultSemiBold" style={styles.cardTitle}>Photo Tips</ThemedText>
+                    <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>
+                        Photo Tips
+                    </ThemedText>
                 </View>
-                <View style={{ gap: 6 }}>
-                    <ThemedText style={styles.tipText}>• Use high-quality, recent photos</ThemedText>
-                    <ThemedText style={styles.tipText}>• Show your face clearly in the first photo</ThemedText>
-                    <ThemedText style={styles.tipText}>• Include full-body shots and varied settings</ThemedText>
-                    <ThemedText style={styles.tipText}>• Smile and look at the camera</ThemedText>
+                <View className="gap-1.5">
+                    <ThemedText style={{ color: TOKENS.textMuted }}>• Use high-quality, recent photos</ThemedText>
+                    <ThemedText style={{ color: TOKENS.textMuted }}>• Show your face clearly in the first photo</ThemedText>
+                    <ThemedText style={{ color: TOKENS.textMuted }}>• Include full-body shots and varied settings</ThemedText>
+                    <ThemedText style={{ color: TOKENS.textMuted }}>• Smile and look at the camera</ThemedText>
                 </View>
             </ThemedView>
 
             {/* Grid */}
-            <ThemedView style={[styles.card, { padding: 12 }]}>
-                <View style={styles.grid}>
+            <ThemedView
+                className="rounded-2xl mt-3 border p-3"
+                style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
+            >
+                <View
+                    className="flex-row flex-wrap justify-between"
+                    // RN 'gap' can be inconsistent; use rowGap via style to match your GAP value.
+                    style={{ rowGap: GAP }}
+                >
                     {photos.map((photo, index) => (
-                        <View key={photo.id} style={[styles.tile, { width: TILE_W, height: TILE_H }]}>
-                            <View style={styles.tileInner}>
+                        <View
+                            key={photo.id}
+                            className="rounded-xl overflow-hidden border"
+                            style={{
+                                width: TILE_W,
+                                height: TILE_H,
+                                backgroundColor: TOKENS.cardAlt,
+                                borderColor: TOKENS.border,
+                            }}
+                        >
+                            <View className="flex-1">
                                 {photo.url ? (
                                     <>
                                         <Image
@@ -112,30 +134,46 @@ export default function TabNineScreen() {
                                         />
 
                                         {photo.isMain && (
-                                            <View style={styles.mainBadge}>
-                                                <ThemedText style={styles.mainBadgeText}>Main</ThemedText>
+                                            <View
+                                                className="absolute top-2 left-2 rounded-full px-2 py-1"
+                                                style={{ backgroundColor: TOKENS.accent }}
+                                            >
+                                                <ThemedText className="text-white text-[11px] font-bold">Main</ThemedText>
                                             </View>
                                         )}
 
-                                        <View style={styles.tileActions}>
+                                        <View className="absolute top-2 right-2 flex-row" style={{ columnGap: 6 }}>
                                             {!photo.isMain && (
-                                                <Pressable onPress={() => handleSetMainPhoto(photo.id)} style={styles.circleBtn}>
+                                                <Pressable
+                                                    onPress={() => handleSetMainPhoto(photo.id)}
+                                                    className="items-center justify-center rounded-full"
+                                                    style={{ width: 30, height: 30, backgroundColor: '#ffffffE6' }}
+                                                >
                                                     <IconSymbol name="star.fill" size={14} color="#f59e0b" />
                                                 </Pressable>
                                             )}
-                                            <Pressable onPress={() => handleRemovePhoto(photo.id)} style={styles.circleBtn}>
+                                            <Pressable
+                                                onPress={() => handleRemovePhoto(photo.id)}
+                                                className="items-center justify-center rounded-full"
+                                                style={{ width: 30, height: 30, backgroundColor: '#ffffffE6' }}
+                                            >
                                                 <IconSymbol name="xmark" size={14} color={TOKENS.danger} />
                                             </Pressable>
                                         </View>
 
-                                        <View style={styles.indexBadge}>
-                                            <ThemedText style={styles.indexText}>{index + 1}</ThemedText>
+                                        <View
+                                            className="absolute left-2 bottom-2 w-6 h-6 rounded-full items-center justify-center"
+                                            style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
+                                        >
+                                            <ThemedText className="text-white text-xs font-bold">{index + 1}</ThemedText>
                                         </View>
                                     </>
                                 ) : (
-                                    <View style={styles.emptyWrap}>
+                                    <View className="flex-1 items-center justify-center">
                                         <IconSymbol name="plus" size={26} color={TOKENS.textMuted} />
-                                        <ThemedText type="defaultSemiBold" style={styles.emptyText}>Add Photo</ThemedText>
+                                        <ThemedText type="defaultSemiBold" className="mt-1.5 text-xs" style={{ color: TOKENS.textMuted }}>
+                                            Add Photo
+                                        </ThemedText>
                                     </View>
                                 )}
                             </View>
@@ -145,63 +183,93 @@ export default function TabNineScreen() {
             </ThemedView>
 
             {/* Actions */}
-            <ThemedView style={[styles.card, { gap: 10 }]}>
-                <Pressable style={styles.primaryBtn}>
+            <ThemedView
+                className="rounded-2xl p-4 mt-3 border"
+                style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
+            >
+                <Pressable
+                    className="rounded-xl py-3.5 flex-row items-center justify-center mb-2.5"
+                    style={{ backgroundColor: TOKENS.accent }}
+                >
                     <IconSymbol name="camera.fill" size={16} color="#fff" />
-                    <ThemedText type="defaultSemiBold" style={styles.primaryBtnText}>Take New Photo</ThemedText>
+                    <ThemedText type="defaultSemiBold" className="ml-2 text-[15px]" style={{ color: '#fff' }}>
+                        Take New Photo
+                    </ThemedText>
                 </Pressable>
 
-                <Pressable style={styles.secondaryBtn}>
+                <Pressable
+                    className="rounded-xl py-3.5 flex-row items-center justify-center border"
+                    style={{ backgroundColor: TOKENS.cardAlt, borderColor: TOKENS.border }}
+                >
                     <IconSymbol name="plus" size={16} color={TOKENS.accent} />
-                    <ThemedText type="defaultSemiBold" style={styles.secondaryBtnText}>Choose from Gallery</ThemedText>
+                    <ThemedText type="defaultSemiBold" className="ml-2 text-[15px]" style={{ color: TOKENS.accent }}>
+                        Choose from Gallery
+                    </ThemedText>
                 </Pressable>
             </ThemedView>
 
             {/* Guidelines */}
-            <ThemedView style={styles.card}>
-                <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text, marginBottom: 8 }}>
+            <ThemedView
+                className="rounded-2xl p-4 mt-3 border"
+                style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
+            >
+                <ThemedText type="defaultSemiBold" className="mb-2" style={{ color: TOKENS.text }}>
                     Photo Guidelines
                 </ThemedText>
 
-                <View style={{ gap: 10 }}>
-                    <View style={styles.ruleRow}>
-                        <View style={[styles.dot, { backgroundColor: TOKENS.success }]} />
+                <View className="gap-2.5">
+                    <View className="flex-row items-start gap-2.5">
+                        <View className="w-2 h-2 rounded-full mt-1.5" style={{ backgroundColor: TOKENS.success }} />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>Do</ThemedText>
-                            <ThemedText style={styles.tipText}>Use recent, clear photos of yourself</ThemedText>
+                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>
+                                Do
+                            </ThemedText>
+                            <ThemedText style={{ color: TOKENS.textMuted }}>Use recent, clear photos of yourself</ThemedText>
                         </View>
                     </View>
 
-                    <View style={styles.ruleRow}>
-                        <View style={[styles.dot, { backgroundColor: TOKENS.danger }]} />
+                    <View className="flex-row items-start gap-2.5">
+                        <View className="w-2 h-2 rounded-full mt-1.5" style={{ backgroundColor: TOKENS.danger }} />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>Don’t</ThemedText>
-                            <ThemedText style={styles.tipText}>Use group photos as your main image</ThemedText>
+                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>
+                                Don’t
+                            </ThemedText>
+                            <ThemedText style={{ color: TOKENS.textMuted }}>Use group photos as your main image</ThemedText>
                         </View>
                     </View>
 
-                    <View style={styles.ruleRow}>
-                        <View style={[styles.dot, { backgroundColor: TOKENS.success }]} />
+                    <View className="flex-row items-start gap-2.5">
+                        <View className="w-2 h-2 rounded-full mt-1.5" style={{ backgroundColor: TOKENS.success }} />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>Do</ThemedText>
-                            <ThemedText style={styles.tipText}>Show your personality and interests</ThemedText>
+                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>
+                                Do
+                            </ThemedText>
+                            <ThemedText style={{ color: TOKENS.textMuted }}>Show your personality and interests</ThemedText>
                         </View>
                     </View>
 
-                    <View style={styles.ruleRow}>
-                        <View style={[styles.dot, { backgroundColor: TOKENS.danger }]} />
+                    <View className="flex-row items-start gap-2.5">
+                        <View className="w-2 h-2 rounded-full mt-1.5" style={{ backgroundColor: TOKENS.danger }} />
                         <View>
-                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>Don’t</ThemedText>
-                            <ThemedText style={styles.tipText}>Use heavily filtered or misleading photos</ThemedText>
+                            <ThemedText type="defaultSemiBold" style={{ color: TOKENS.text }}>
+                                Don’t
+                            </ThemedText>
+                            <ThemedText style={{ color: TOKENS.textMuted }}>
+                                Use heavily filtered or misleading photos
+                            </ThemedText>
                         </View>
                     </View>
                 </View>
             </ThemedView>
 
             {/* Footer summary */}
-            <ThemedView style={[styles.card, { alignItems: 'center' }]}>
+            <ThemedView
+                className="rounded-2xl p-4 mt-3 border items-center"
+                style={{ backgroundColor: TOKENS.card, borderColor: TOKENS.border }}
+            >
                 <ThemedText style={{ color: TOKENS.textMuted }}>
-                    {filled.length}/6 photos added · Pick your best as <ThemedText style={{ color: TOKENS.text }}>Main</ThemedText>
+                    {filled.length}/6 photos added · Pick your best as{' '}
+                    <ThemedText style={{ color: TOKENS.text }}>Main</ThemedText>
                 </ThemedText>
             </ThemedView>
         </ParallaxScrollView>
@@ -209,7 +277,6 @@ export default function TabNineScreen() {
 }
 
 const styles = StyleSheet.create({
-    // Header
     headerWrap: {
         height: 200,
         borderBottomLeftRadius: 20,
@@ -237,82 +304,4 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         borderRadius: 16,
     },
-
-    // Cards
-    card: {
-        backgroundColor: TOKENS.card,
-        borderRadius: 20,
-        padding: 16,
-        marginTop: 12,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: TOKENS.border,
-    },
-    cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-    cardTitle: { color: TOKENS.text },
-    tipText: { color: TOKENS.textMuted },
-
-    // Grid
-    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: GAP, justifyContent: 'space-between' },
-    tile: { borderRadius: 16, overflow: 'hidden', backgroundColor: TOKENS.cardAlt, borderWidth: StyleSheet.hairlineWidth, borderColor: TOKENS.border },
-    tileInner: { flex: 1 },
-    emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-    emptyText: { color: TOKENS.textMuted, marginTop: 6, fontSize: 12 },
-
-    mainBadge: {
-        position: 'absolute',
-        top: 8,
-        left: 8,
-        backgroundColor: TOKENS.accent,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 999,
-    },
-    mainBadgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-
-    tileActions: { position: 'absolute', top: 8, right: 8, flexDirection: 'row', gap: 6 },
-    circleBtn: {
-        width: 30, height: 30, borderRadius: 15,
-        backgroundColor: '#ffffffE6',
-        alignItems: 'center', justifyContent: 'center',
-    },
-    indexBadge: {
-        position: 'absolute',
-        left: 8,
-        bottom: 8,
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: 'rgba(0,0,0,0.55)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    indexText: { color: '#fff', fontSize: 12, fontWeight: '700' },
-
-    // Buttons
-    primaryBtn: {
-        backgroundColor: TOKENS.accent,
-        borderRadius: 14,
-        paddingVertical: 14,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-    },
-    primaryBtnText: { color: '#fff', fontSize: 15 },
-    secondaryBtn: {
-        backgroundColor: TOKENS.cardAlt,
-        borderRadius: 14,
-        paddingVertical: 14,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        borderWidth: 1,
-        borderColor: TOKENS.border,
-    },
-    secondaryBtnText: { color: TOKENS.accent, fontSize: 15 },
-
-    // Guidelines
-    ruleRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-    dot: { width: 8, height: 8, borderRadius: 4, marginTop: 6 },
 });
