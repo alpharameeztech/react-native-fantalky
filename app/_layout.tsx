@@ -32,6 +32,11 @@ export default function RootLayout() {
                     options={{ title: 'Home', drawerLabel: 'Home' }}
                 />
 
+                <Drawer.Screen
+                    name="settings"
+                    options={{ title: 'Settings', drawerLabel: 'Settings' }}
+                />
+
                 {/* Keep tabs mounted but not listed in the drawer */}
                 <Drawer.Screen
                     name="(tabs)"
