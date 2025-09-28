@@ -48,6 +48,11 @@ export default function TabLayout() {
                 title: 'Settings',
             }}
         />
+        <Tabs.Screen
+            name="edit-photos"
+            options={{ href: null, title: 'Edit Photos' }}
+        />
+        <Tabs.Screen name="matches"  options={{ href: null, title: 'Messages' }} />
     </Tabs>
   );
 }

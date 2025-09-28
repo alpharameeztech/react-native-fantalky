@@ -32,6 +32,8 @@ export default function RootLayout() {
                     options={{ title: 'Home', drawerLabel: 'Home' }}
                 />
 
+                <Drawer.Screen name="messages"  options={{ title: 'Messages', drawerLabel: 'Messages' }} />
+
                 <Drawer.Screen
                     name="settings"
                     options={{ title: 'Settings', drawerLabel: 'Settings' }}
